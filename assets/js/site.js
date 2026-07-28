@@ -59,7 +59,7 @@ class SiteHeader extends HTMLElement {
   <div class="wrap topbar__inner">
     <a class="brand" href="index.html" aria-label="Pro Kuolimo ry, etusivu">
       ${MARK}
-      <span>
+      <span class="brand__text">
         <span class="brand__name">Pro Kuolimo</span>
         <span class="brand__sub">Vesiensuojelua vuodesta 2012</span>
       </span>

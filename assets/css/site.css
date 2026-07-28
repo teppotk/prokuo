@@ -525,6 +525,15 @@ p {
   color: var(--water);
 }
 
+/* Grid poistaa periytyvän rivinvälin (1,6) tuottaman tyhjän tilan nimen
+   rivilaatikosta. Inline-latonnassa rivin korkeus tulee kääre-elementin
+   strutista, ei nimen omasta line-heightista, joten rivien väliin jäisi
+   noin 6 px kuollutta tilaa jota marginaali ei koske. */
+.brand__text {
+  display: grid;
+  line-height: 1;
+}
+
 .brand__name {
   font-family: var(--sans);
   font-size: 1rem;
@@ -540,7 +549,10 @@ p {
   font-weight: 500;
   letter-spacing: 0.1em;
   color: var(--ink-2);
-  margin-top: 0.25rem;
+  /* Leipätekstin rivinväli 1,6 kasvattaisi rivien väliin ylimääräisen
+     puoliskon; tunnus latotaan tiiviisti kahdeksi riviksi. */
+  line-height: 1.15;
+  margin-top: 0.15rem;
 }
 
 @media (max-width: 26rem) {
