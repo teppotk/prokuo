@@ -1113,6 +1113,15 @@ p {
   text-decoration-color: currentcolor;
 }
 
+/* Vuosi- ja tyyppitagit ovat yksi rivittyvä yksikkö: ne siirtyvät kapealla
+   näytöllä yhdessä seuraavalle riville, eivät koskaan erikseen. */
+.doc__tags {
+  display: flex;
+  flex: none;
+  gap: 0.4rem;
+  align-items: baseline;
+}
+
 .doc__meta {
   font-family: var(--mono);
   font-size: 0.8125rem;

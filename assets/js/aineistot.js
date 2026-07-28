@@ -54,10 +54,14 @@ async function init(el) {
           <h3>${esc(g.ryhma)}</h3>
           <ul>${files
             .map(
+              // Vuosi ja tiedostotyyppi ovat yhdessä kapselissa, jotta ne
+              // rivittyvät aina parina eivätkä koskaan eri riveille.
               (f) => `<li><a class="doc" href="${esc(f.url)}">
                 <span class="doc__name">${esc(f.nimi)}</span>
-                <span class="doc__meta">${esc(f.vuosi)}</span>
-                <span class="doc__meta">${esc(f.tyyppi)}</span>
+                <span class="doc__tags">
+                  <span class="doc__meta">${esc(f.vuosi)}</span>
+                  <span class="doc__meta">${esc(f.tyyppi)}</span>
+                </span>
               </a></li>`
             )
             .join("")}</ul>
