@@ -1,0 +1,34 @@
+[
+  {
+    "ryhma": "Kuolimon tiedot",
+    "linkit": [
+      { "nimi": "Järviwiki: Kuolimo", "url": "https://www.jarviwiki.fi/wiki/Kuolimo_(04.141.1.001)", "kuvaus": "Järven perustiedot ja havaintopaikat" },
+      { "nimi": "Natura 2000: Kuolimo", "url": "https://www.ymparisto.fi/fi/luonto-vesistot-ja-meri/luonnon-monimuotoisuus/suojelu-ennallistaminen-ja-luonnonhoito/natura-2000-alueet/kuolimo", "kuvaus": "Suojelualueen kuvaus" },
+      { "nimi": "Vesikartta", "url": "https://paikkatieto.ymparisto.fi/vesikartta/", "kuvaus": "Ympäristöhallinnon avoin vesistökarttapalvelu" },
+      { "nimi": "Kuolimokamera", "url": "https://www.savitaipale.fi/fi/kunta-ja-hallinto/tietoa-kunnasta/kuolimokamera", "kuvaus": "Savitaipaleen kunnan suora näkymä Kuolimolle" }
+    ]
+  },
+  {
+    "ryhma": "Kumppanit ja alueen toimijat",
+    "linkit": [
+      { "nimi": "Saimaan vesiensuojeluyhdistys: Kuolimo", "url": "https://www.svsy.fi/yhdistys/kuolimo/", "kuvaus": "Vesistötarkkailu ja hankkeet Kuolimolla" },
+      { "nimi": "Ala-Kuolimon osakaskunta", "url": "https://alakuolimo.fi/", "kuvaus": "Kalastus, luvat ja vesialueen hoito" },
+      { "nimi": "Suomen luonnonsuojeluliitto", "url": "https://www.sll.fi/", "kuvaus": "Etelä-Karjalan luonnonsuojelupiiri" },
+      { "nimi": "Piensaimaa ja Pisara-hanke", "url": "https://www.piensaimaa.fi/", "kuvaus": "Naapurivesistön suojelutyö" },
+      { "nimi": "LUT-yliopisto", "url": "https://www.lut.fi/fi", "kuvaus": "Tutkimusyhteistyö" },
+      { "nimi": "Lappeenrannan seudun ympäristötoimi", "url": "https://www.lappeenranta.fi/fi/ymparisto/lappeenrannan-seudun-ymparistotoimi", "kuvaus": "Ympäristönsuojelu Savitaipaleella ja naapurikunnissa" }
+    ]
+  },
+  {
+    "ryhma": "Viranomaiset ja järjestöt",
+    "linkit": [
+      { "nimi": "Ympäristöministeriö", "url": "https://ym.fi/etusivu", "kuvaus": "Vesien- ja luonnonsuojelun ohjaus" },
+      { "nimi": "Maa- ja metsätalousministeriö", "url": "https://mmm.fi/etusivu", "kuvaus": "Kalatalous ja vesivarat" },
+      { "nimi": "Suomen ympäristökeskus", "url": "https://www.syke.fi/fi", "kuvaus": "Tutkimus ja avoin ympäristötieto" },
+      { "nimi": "WWF Suomi", "url": "https://wwf.fi/", "kuvaus": "Virtavesien ja kalakantojen kunnostus" },
+      { "nimi": "Luonnontila.fi", "url": "https://luonnontila.fi/", "kuvaus": "Luonnon tilan seurantaindikaattorit" },
+      { "nimi": "Vesikoulu", "url": "http://www.vesikoulu.fi/", "kuvaus": "Vesitietoa opetukseen" },
+      { "nimi": "Suomen Luonto", "url": "https://suomenluonto.fi/", "kuvaus": "Luontojournalismi" }
+    ]
+  }
+]
