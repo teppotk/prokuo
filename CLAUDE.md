@@ -65,8 +65,8 @@ treatment.
 element and its most fragile part. The dataset is *derived*, not authored:
 `tools/extract-nakosyvyys.py` pairs point labels with values by geometry from
 the association's PDF report, using a deliberately strict positional rule and
-skipping anything ambiguous (it reports skips on stderr). A copy of the source
-report is in `lahteet/`.
+skipping anything ambiguous (it reports skips on stderr). The source report is
+`aineistot/2025-11-19-pro-kuolimo-nakosyvyysmittaustulokset.pdf`.
 
 Consequences to respect:
 
@@ -135,10 +135,24 @@ Factual claims carry a source link: lake figures cite Järviwiki/SYKE, measureme
 results cite the association's report PDF. Keep it that way — the whole point of
 the redesign is that the association's arguments are checkable.
 
-External document links point at the live WordPress `wp-content/uploads/`
-directory on prokuolimo.fi. They were all verified working. If WordPress is
-decommissioned those files must be migrated and the URLs in
-`data/aineistot.json` and `data/uutiset.json` updated.
+## Documents
 
-`media-source/` (original photos) and `lahteet/` (source PDFs) are working
-directories and are not part of the deployed site.
+Every report, plan, instruction sheet and presentation the association
+publishes lives in `aineistot/` — 73 files, ~140 MB, copied byte-for-byte from
+the old WordPress site. Filenames are ASCII, lowercase, hyphenated (ä→a, ö→o)
+so no URL needs percent-encoding. The site has **no runtime dependency on
+prokuolimo.fi** any more; every document link is relative.
+
+- These are official monitoring reports and public records. Do not recompress,
+  re-render or otherwise alter them — provenance matters more than repo size.
+- Adding a document means two edits: the file into `aineistot/` and a row in
+  `data/aineistot.json`. `check-links.py` validates the `"url"` fields of both
+  data files against the filesystem, so a typo fails the check.
+
+`media-source/` (original photographs, input to `build-images.sh`) is the only
+working directory that is not part of the deployed site.
+
+Absolute `https://prokuolimo.fi/` URLs remain only in `canonical`/`og:` tags and
+`sitemap.xml`, pointing at the eventual production address. Everything else is
+relative, which is why the site also works from a subdirectory such as the
+GitHub Pages preview at `teppotk.github.io/prokuo/`.

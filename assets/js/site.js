@@ -131,7 +131,7 @@ class SiteFooter extends HTMLElement {
           <li>Y-tunnus ${YHTEYS.ytunnus}</li>
           <li>Rekisterinumero 209.206</li>
           <li>Perustettu 20.10.2012</li>
-          <li><a href="https://prokuolimo.fi/wp-content/uploads/2014/12/Pro-Kuolimo-ry-esite-09082025.pdf">Yhdistyksen esite (PDF)</a></li>
+          <li><a href="aineistot/pro-kuolimo-ry-esite-09082025.pdf">Yhdistyksen esite (PDF)</a></li>
         </ul>
       </div>
     </div>

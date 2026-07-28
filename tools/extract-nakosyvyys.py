@@ -49,8 +49,7 @@ ALIAS = {
 
 LAHDE = {
     "nimi": "Pro Kuolimo – näkösyvyysmittaustulokset 19.11.2025",
-    "url": "https://prokuolimo.fi/wp-content/uploads/2025/11/"
-           "2025-11-19-Pro-Kuolimo-näkösyvyysmittaustulokset.pdf",
+    "url": "aineistot/2025-11-19-pro-kuolimo-nakosyvyysmittaustulokset.pdf",
 }
 
 

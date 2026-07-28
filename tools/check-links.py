@@ -44,6 +44,9 @@ for src in pages + extra_sources:
     links = HREF.findall(text)
     if src.endswith(".json") or src.endswith(".js"):
         links += re.findall(r'"(https?://[^"]+)"', text)
+        # Aineisto- ja uutislistojen "url"-kentät ovat suhteellisia polkuja
+        # repon tiedostoihin (aineistot/*.pdf). Nekin on tarkistettava.
+        links += re.findall(r'"url":\s*"([^":]+)"', text)
 
     for link in links:
         if "${" in link:  # JS-mallipohjan paikanpitäjä, ei oikea linkki
