@@ -154,7 +154,9 @@ async function kaynnista(juuri) {
   juuri.innerHTML = `
     <div class="kartta kartta--kirjaus" data-kartta-el></div>
 
-    <p class="sijaintitila" data-sijaintitila aria-live="polite">Haetaan sijaintia…</p>
+    <p class="sijaintitila" data-sijaintitila aria-live="polite">
+      <span class="sijaintitila__viesti">Haetaan sijaintia…</span>
+    </p>
 
     <div class="btn-row btn-row--kirjaus">
       <button class="btn btn--ghost" type="button" data-oma-sijainti>Oma sijainti</button>
@@ -292,21 +294,50 @@ async function kaynnista(juuri) {
       )
       .join("") + '<option value="">— muu paikka, ei listalla —</option>';
 
-  const LAHTEET = {
-    gps: "puhelimen paikannus",
-    kartta: "siirretty kartalla",
-    piste: "mittauspisteen sijainti",
-  };
+  /** Matka luettavassa muodossa: alle kilometri metreinä, sen yli kilometreinä. */
+  function matka(metria) {
+    return metria >= 1000
+      ? `${fiNum(metria / 1000)} km`
+      : `${Math.round(metria)} m`;
+  }
+
+  /**
+   * Mistä koordinaatti on peräisin. Tämä on kirjauksen tärkein epävarmuustieto:
+   * puhelimen paikannus on mitattu, pistelistan sijainti voi olla pelkkä arvio.
+   */
+  function lahdeteksti() {
+    if (tila.lahde === "gps") {
+      return tila.tarkkuus != null
+        ? `Puhelimen paikannus, tarkkuus ±${Math.round(tila.tarkkuus)} m`
+        : "Puhelimen paikannus";
+    }
+    if (tila.lahde === "kartta") return "Asetettu kartalla";
+    const valittu = pisteet.find((p) => p.id === pisteValinta.value);
+    return valittu && valittu.tarkkuus === "arvio"
+      ? "Pistelistasta – sijainti on arvio, tarkenna kartalla"
+      : "Pistelistasta, maastossa tarkennettu";
+  }
+
+  /** Näyttää lyhyen viestin koordinaattilukeman tilalla (haku, virhe). */
+  function naytaViesti(teksti) {
+    sijaintitila.innerHTML = `<span class="sijaintitila__viesti">${esc(teksti)}</span>`;
+  }
 
   function paivitaSijainti() {
     kirjausMerkki.setLatLng([tila.lat, tila.lon]);
-    const tarkkuus =
-      tila.lahde === "gps" && tila.tarkkuus != null
-        ? ` · tarkkuus ±<span class="num">${Math.round(tila.tarkkuus)}</span> m`
-        : "";
-    sijaintitila.innerHTML =
-      `Kirjataan kohtaan <span class="num">${esc(koordinaatti(tila.lat, tila.lon))}</span>` +
-      ` <em>(${LAHTEET[tila.lahde]})</em>${tarkkuus}`;
+
+    // Lähin piste kertoo vain silloin jotain, kun sijainti ei ole pisteestä
+    // itsestään – muuten se näyttäisi aina nollan metrin päässä olevan pisteen.
+    let lahin = "";
+    if (tila.lahde !== "piste") {
+      const osuma = lahinPiste(pisteet, tila.lat, tila.lon);
+      if (osuma) lahin = ` · lähin piste ${esc(osuma.piste.id)}, ${matka(osuma.etaisyys)}`;
+    }
+
+    sijaintitila.innerHTML = `
+      <span class="label">Mittauspisteen koordinaatti</span>
+      <b class="sijaintitila__arvo">${esc(koordinaatti(tila.lat, tila.lon))}</b>
+      <span class="sijaintitila__meta">${esc(lahdeteksti())}${lahin}</span>`;
   }
 
   function valitsePiste(id, siirraSijainti) {
@@ -332,6 +363,7 @@ async function kaynnista(juuri) {
 
   pisteValinta.addEventListener("change", () => {
     if (pisteValinta.value) valitsePiste(pisteValinta.value, true);
+    else paivitaSijainti();
   });
 
   /* --- Paikannus -------------------------------------------------------- */
@@ -344,13 +376,12 @@ async function kaynnista(juuri) {
       2: "Sijaintia ei saatu. Siirrä merkki kartalla oikeaan kohtaan.",
       3: "Paikannus kesti liian kauan. Siirrä merkki kartalla oikeaan kohtaan.",
     };
-    sijaintitila.textContent = syyt[err.code] || "Sijaintia ei saatu.";
+    naytaViesti(syyt[err.code] || "Sijaintia ei saatu.");
   }
 
   function seuraaSijaintia() {
     if (!("geolocation" in navigator)) {
-      sijaintitila.textContent =
-        "Selain ei tue paikannusta. Siirrä merkki kartalla oikeaan kohtaan.";
+      naytaViesti("Selain ei tue paikannusta. Siirrä merkki kartalla oikeaan kohtaan.");
       return;
     }
     navigator.geolocation.watchPosition(
@@ -395,7 +426,7 @@ async function kaynnista(juuri) {
 
   function kaytaOmaaSijaintia() {
     if (!tila.gps) {
-      sijaintitila.textContent = "Sijaintia ei ole vielä saatu. Odota hetki.";
+      naytaViesti("Sijaintia ei ole vielä saatu. Odota hetki.");
       return;
     }
     tila.lat = tila.gps.lat;
@@ -407,15 +438,12 @@ async function kaynnista(juuri) {
     ehdotaLahinta();
   }
 
+  /** Valitsee lähimmän pisteen listasta, mutta ei siirrä kirjattavaa sijaintia. */
   function ehdotaLahinta() {
     const osuma = lahinPiste(pisteet, tila.lat, tila.lon);
     if (!osuma) return;
     pisteValinta.value = osuma.piste.id;
-    const km = osuma.etaisyys >= 1000;
-    sijaintitila.innerHTML +=
-      ` · lähin piste <b>${esc(osuma.piste.id)}</b>, ` +
-      `<span class="num">${km ? fiNum(osuma.etaisyys / 1000) : Math.round(osuma.etaisyys)}</span> ` +
-      (km ? "km" : "m");
+    paivitaSijainti();
   }
 
   juuri.querySelector("[data-oma-sijainti]").addEventListener("click", kaytaOmaaSijaintia);

@@ -1972,14 +1972,35 @@ p {
   border-left: 2px solid var(--nieria-bright);
 }
 
+/* Kirjattava koordinaatti on lomakkeen tärkein yksittäinen tieto, joten se on
+   otsikoitu lukema eikä virkkeen sisään upotettu luku. Alarivi kertoo, mistä
+   koordinaatti on peräisin – se ratkaisee, kuinka luotettava se on. */
 .sijaintitila {
+  display: grid;
+  gap: 0.2rem;
   margin-top: 0.9rem;
+  padding: 0.8rem 0.95rem;
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
   font-size: var(--fs-small);
   color: var(--ink-2);
 }
 
-.sijaintitila em {
-  font-style: normal;
+.sijaintitila__arvo {
+  font-family: var(--mono);
+  font-size: var(--fs-body);
+  font-weight: 500;
+  color: var(--ink);
+  overflow-wrap: normal;
+}
+
+.sijaintitila__meta {
+  font-size: var(--fs-micro);
+}
+
+.sijaintitila__viesti {
+  font-family: var(--mono);
 }
 
 /* --- Tallennetut kirjaukset ---------------------------------------------- */
