@@ -2003,6 +2003,59 @@ p {
   font-family: var(--mono);
 }
 
+/* --- Kirjausnäkymän asettelu --------------------------------------------- */
+/* Puhelimella pystysarake: kartta, lomake, lista. Työpöydällä lomake nousee
+   kartan viereen ja tallennetut kirjaukset kartan alle, jotta juuri tallennettu
+   rivi on samassa näkymässä kuin lomake – muuten tallennus näyttää siltä, ettei
+   mitään tapahtunut. */
+.kirjausnakyma {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 62rem) {
+  .kirjausnakyma {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    column-gap: 2rem;
+    row-gap: 1.75rem;
+    align-items: start;
+  }
+
+  .kirjausnakyma__kartta {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  /* Kartta on työpöydällä vain puolet leveydestä, joten se saa lisää korkeutta
+     – muuten mittauspisteet jäävät liian lähelle toisiaan osuttaviksi. */
+  .kirjausnakyma .kartta--kirjaus {
+    height: clamp(22rem, 48vh, 32rem);
+  }
+
+  .kirjausnakyma__lomake {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    margin-top: 0;
+  }
+
+  .kirjausnakyma__lista {
+    grid-column: 1;
+    grid-row: 2;
+    margin-top: 0;
+  }
+}
+
+/* --- Tallennuksen kuittaus ----------------------------------------------- */
+.kuittaus {
+  font-size: var(--fs-small);
+  color: var(--ink);
+  background: var(--paper-2);
+  border: 1px solid var(--moss);
+  border-left-width: 3px;
+  border-radius: var(--radius);
+  padding: 0.7rem 0.9rem;
+}
+
 /* --- Tallennetut kirjaukset ---------------------------------------------- */
 .kirjaukset {
   margin-top: 2.5rem;
@@ -2012,6 +2065,12 @@ p {
 
 .kirjaukset h2 {
   margin-bottom: 0.6rem;
+}
+
+.kirjaukset h2 span {
+  font-family: var(--mono);
+  font-size: var(--fs-small);
+  color: var(--ink-2);
 }
 
 .kirjaukset .btn-row {
@@ -2026,12 +2085,22 @@ p {
 }
 
 .kirjaus {
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+/* Juuri tallennettu rivi merkitään, jotta sen löytää listasta heti. */
+.kirjaus--uusin {
+  border-left: 3px solid var(--moss);
+  padding-left: 0.75rem;
+  background: var(--paper-2);
+}
+
+.kirjaus__paa {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: 0.5rem 0.9rem;
-  padding: 0.8rem 0;
-  border-bottom: 1px solid var(--rule);
 }
 
 .kirjaus__arvo {
@@ -2040,23 +2109,9 @@ p {
   color: var(--water);
 }
 
-.kirjaus__paikka {
-  flex: 1 1 min(12rem, 100%);
-  min-width: 0;
-  font-size: var(--fs-small);
-  color: var(--ink-2);
-}
-
-.kirjaus__paikka b {
-  display: block;
-  font-family: var(--mono);
-  font-weight: 500;
-  overflow-wrap: normal;
-  color: var(--ink);
-}
-
 .kirjaus__aika {
-  flex: none;
+  flex: 1 1 auto;
+  min-width: 0;
   font-size: var(--fs-micro);
   color: var(--ink-2);
 }
@@ -2076,6 +2131,41 @@ p {
 .kirjaus__poista:hover {
   color: var(--nieria);
   border-color: var(--nieria-bright);
+}
+
+/* Kaikki tallennetut kentät näkyviin: kirjaaja tarkistaa aineiston täältä. */
+.kirjaus__tiedot {
+  margin: 0.45rem 0 0;
+  display: grid;
+  gap: 0.15rem;
+  font-size: var(--fs-micro);
+}
+
+.kirjaus__tiedot > div {
+  display: grid;
+  grid-template-columns: minmax(0, 7rem) minmax(0, 1fr);
+  gap: 0.6rem;
+}
+
+.kirjaus__tiedot dt {
+  color: var(--ink-2);
+}
+
+.kirjaus__tiedot dd {
+  margin: 0;
+  min-width: 0;
+  color: var(--ink);
+}
+
+.kirjaus__lahde {
+  color: var(--ink-2);
+}
+
+@media (max-width: 26rem) {
+  .kirjaus__tiedot > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
 }
 
 @media print {

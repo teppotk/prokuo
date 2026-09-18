@@ -152,18 +152,22 @@ async function kaynnista(juuri) {
   const pisteet = aineisto.pisteet.map((p) => ({ ...p, ...(korjaukset[p.id] || {}) }));
 
   juuri.innerHTML = `
-    <div class="kartta kartta--kirjaus" data-kartta-el></div>
+    <div class="kirjausnakyma">
 
-    <p class="sijaintitila" data-sijaintitila aria-live="polite">
-      <span class="sijaintitila__viesti">Haetaan sijaintia…</span>
-    </p>
+    <div class="kirjausnakyma__kartta">
+      <div class="kartta kartta--kirjaus" data-kartta-el></div>
 
-    <div class="btn-row btn-row--kirjaus">
-      <button class="btn btn--ghost" type="button" data-oma-sijainti>Oma sijainti</button>
-      <button class="btn btn--ghost" type="button" data-lahin-piste>Lähin piste</button>
+      <p class="sijaintitila" data-sijaintitila aria-live="polite">
+        <span class="sijaintitila__viesti">Haetaan sijaintia…</span>
+      </p>
+
+      <div class="btn-row btn-row--kirjaus">
+        <button class="btn btn--ghost" type="button" data-oma-sijainti>Oma sijainti</button>
+        <button class="btn btn--ghost" type="button" data-lahin-piste>Lähin piste</button>
+      </div>
     </div>
 
-    <form class="lomake" data-lomake novalidate>
+    <form class="lomake kirjausnakyma__lomake" data-lomake novalidate>
       <div class="lomake__rivi">
         <label class="field">
           <span>Mittauspiste</span>
@@ -211,10 +215,12 @@ async function kaynnista(juuri) {
       <p class="lomake__virhe" data-virhe role="alert" hidden></p>
 
       <button class="btn btn--primary btn--tallenna" type="submit">Tallenna kirjaus</button>
+
+      <p class="kuittaus" data-kuittaus role="status" hidden></p>
     </form>
 
-    <section class="kirjaukset" aria-labelledby="kirjaukset-otsikko">
-      <h2 id="kirjaukset-otsikko">Tallennetut kirjaukset</h2>
+    <section class="kirjaukset kirjausnakyma__lista" aria-labelledby="kirjaukset-otsikko">
+      <h2 id="kirjaukset-otsikko">Tallennetut kirjaukset <span data-maara></span></h2>
       <p class="note">Kirjaukset ovat vain tässä selaimessa. Vie ne tiedostoksi ja
         toimita sihteerille – selaimen tietojen tyhjennys poistaa ne.</p>
       <div data-lista></div>
@@ -223,7 +229,9 @@ async function kaynnista(juuri) {
         <button class="btn btn--ghost" type="button" data-vie-csv>Vie CSV</button>
         <button class="btn btn--ghost" type="button" data-tyhjenna>Tyhjennä kaikki</button>
       </div>
-    </section>`;
+    </section>
+
+    </div>`;
 
   const kartta = luoKartta(juuri.querySelector("[data-kartta-el]"), {
     scrollWheelZoom: true,
@@ -283,6 +291,7 @@ async function kaynnista(juuri) {
   const sijaintitila = juuri.querySelector("[data-sijaintitila]");
   const pisteValinta = juuri.querySelector("[data-piste]");
   const virhe = juuri.querySelector("[data-virhe]");
+  const kuittaus = juuri.querySelector("[data-kuittaus]");
 
   pisteValinta.innerHTML =
     pisteet
@@ -477,6 +486,26 @@ async function kaynnista(juuri) {
   function naytaVirhe(teksti) {
     virhe.textContent = teksti;
     virhe.hidden = !teksti;
+    if (teksti) kuittaus.hidden = true;
+  }
+
+  /**
+   * Tallennuksen kuittaus. Ilman sitä lomake vain tyhjenee, eikä kirjaaja näe
+   * mistään, menikö syöte perille – lista on työpöydällä kartan alla ja
+   * puhelimella vasta lomakkeen jälkeen, eli usein näkymän ulkopuolella.
+   */
+  let kuittausAjastin = null;
+  function naytaKuittaus(k) {
+    kuittaus.innerHTML =
+      `Tallennettu: <b>${esc(k.piste || "muu paikka")}</b>, ` +
+      `<span class="num">${fiNum(k.nakosyvyys)}</span> m, ` +
+      `<span class="num">${esc(fiDate(k.pvm))}</span> klo ` +
+      `<span class="num">${esc(k.klo)}</span>. Kirjaus näkyy listassa.`;
+    kuittaus.hidden = false;
+    clearTimeout(kuittausAjastin);
+    kuittausAjastin = setTimeout(() => {
+      kuittaus.hidden = true;
+    }, 10000);
   }
 
   lomake.addEventListener("submit", (e) => {
@@ -545,7 +574,8 @@ async function kaynnista(juuri) {
     kentat.nakosyvyys.value = "";
     kentat.huomiot.value = "";
     asetaNyt();
-    piirraLista();
+    piirraLista(kirjaus.id);
+    naytaKuittaus(kirjaus);
     kentat.nakosyvyys.focus();
   });
 
@@ -553,24 +583,54 @@ async function kaynnista(juuri) {
 
   const lista = juuri.querySelector("[data-lista]");
 
-  function piirraLista() {
+  const maara = juuri.querySelector("[data-maara]");
+
+  const LAHDE_LYHYT = {
+    gps: "puhelimen paikannus",
+    kartta: "asetettu kartalla",
+    piste: "pistelistasta",
+  };
+
+  /**
+   * Yksi kirjaus listassa. Rivillä näkyvät kaikki tallennetut kentät, myös
+   * mittaaja ja huomiot: kirjaaja ei voi muuten varmistua siitä, että syöte
+   * meni perille oikein, eikä vietävää aineistoa pääse tarkistamaan mitenkään
+   * ennen vientiä.
+   */
+  function kirjausRivi(k, uusin) {
+    const rivit = [
+      ["Paikka", k.piste
+        ? `${esc(k.piste)}${k.pisteen_nimi ? ` – ${esc(k.pisteen_nimi)}` : ""}`
+        : "muu paikka, ei listalla"],
+      ["Koordinaatti", `<span class="num">${esc(koordinaatti(k.lat, k.lon))}</span>
+        <span class="kirjaus__lahde">${esc(LAHDE_LYHYT[k.sijainnin_lahde] || k.sijainnin_lahde)}${
+          k.tarkkuus_m ? `, ±${esc(k.tarkkuus_m)} m` : ""
+        }</span>`],
+    ];
+    if (k.mittaaja) rivit.push(["Mittaaja", esc(k.mittaaja)]);
+    if (k.huomiot) rivit.push(["Huomiot", esc(k.huomiot)]);
+
+    return `<li class="kirjaus${uusin ? " kirjaus--uusin" : ""}">
+      <div class="kirjaus__paa">
+        <span class="kirjaus__arvo num">${fiNum(k.nakosyvyys)} m</span>
+        <span class="kirjaus__aika num">${esc(fiDate(k.pvm))} klo ${esc(k.klo)}</span>
+        <button class="kirjaus__poista" type="button" data-poista="${esc(k.id)}"
+                aria-label="Poista kirjaus ${esc(k.piste)} ${esc(fiDate(k.pvm))}">Poista</button>
+      </div>
+      <dl class="kirjaus__tiedot">${rivit
+        .map(([nimi, arvo]) => `<div><dt>${nimi}</dt><dd>${arvo}</dd></div>`)
+        .join("")}</dl>
+    </li>`;
+  }
+
+  function piirraLista(korostaId) {
+    maara.textContent = kirjaukset.length ? `(${kirjaukset.length})` : "";
     if (!kirjaukset.length) {
       lista.innerHTML = '<p class="status">Ei vielä kirjauksia.</p>';
       return;
     }
     lista.innerHTML = `<ul class="kirjauslista">${kirjaukset
-      .map(
-        (k) => `<li class="kirjaus">
-          <span class="kirjaus__arvo num">${fiNum(k.nakosyvyys)} m</span>
-          <span class="kirjaus__paikka">
-            <b>${esc(k.piste || "muu paikka")}</b>
-            ${k.pisteen_nimi ? esc(k.pisteen_nimi) : esc(koordinaatti(k.lat, k.lon))}
-          </span>
-          <span class="kirjaus__aika num">${esc(fiDate(k.pvm))} ${esc(k.klo)}</span>
-          <button class="kirjaus__poista" type="button" data-poista="${esc(k.id)}"
-                  aria-label="Poista kirjaus ${esc(k.piste)} ${esc(fiDate(k.pvm))}">Poista</button>
-        </li>`
-      )
+      .map((k) => kirjausRivi(k, k.id === korostaId))
       .join("")}</ul>`;
 
     lista.querySelectorAll("[data-poista]").forEach((nappi) => {
