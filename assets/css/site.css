@@ -2010,6 +2010,14 @@ p {
   font-family: var(--mono);
 }
 
+.sijaintitila__varoitus {
+  margin-top: 0.35rem;
+  font-size: var(--fs-micro);
+  color: var(--nieria);
+  border-left: 2px solid var(--nieria-bright);
+  padding-left: 0.6rem;
+}
+
 /* --- Kirjausnäkymän asettelu --------------------------------------------- */
 /* Puhelimella pystysarake: kartta, lomake, lista.
 

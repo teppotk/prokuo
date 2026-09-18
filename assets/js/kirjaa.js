@@ -22,6 +22,7 @@ import {
   pisteMerkki,
   pisteenNimi,
   koordinaatti,
+  etaisyys,
   lahinPiste,
 } from "./kartta-apu.js";
 
@@ -60,6 +61,14 @@ const AVAIN_PORTTI = "prokuolimo.portti";
 const AVAIN_KIRJAUKSET = "prokuolimo.kirjaukset";
 const AVAIN_KORJAUKSET = "prokuolimo.pistekorjaukset";
 const AVAIN_MITTAAJA = "prokuolimo.mittaaja";
+
+/**
+ * Kuinka kaukana valitusta mittauspisteestä kirjattava sijainti saa olla ennen
+ * kuin pistevalinta katsotaan vanhentuneeksi. Lähimmät pisteet (B1 ja B2) ovat
+ * 587 metrin päässä toisistaan, joten raja on selvästi sen puolikkaan alle:
+ * valinta ei voi jäädä osoittamaan naapuripistettä.
+ */
+const PISTEEN_SIETO_M = 250;
 
 /* --- Paikallinen tallennus ----------------------------------------------- */
 
@@ -322,7 +331,8 @@ async function kaynnista(juuri) {
     }
     if (tila.lahde === "kartta") return "Asetettu kartalla";
     const valittu = pisteet.find((p) => p.id === pisteValinta.value);
-    return valittu && valittu.tarkkuus === "arvio"
+    if (!valittu) return "Mittauspistettä ei ole valittu";
+    return valittu.tarkkuus === "arvio"
       ? "Pistelistasta – sijainti on arvio, tarkenna kartalla"
       : "Pistelistasta, maastossa tarkennettu";
   }
@@ -343,14 +353,22 @@ async function kaynnista(juuri) {
       if (osuma) lahin = ` · lähin piste ${esc(osuma.piste.id)}, ${matka(osuma.etaisyys)}`;
     }
 
+    const varoitus = irronnutPiste
+      ? `<span class="sijaintitila__varoitus">Mittauspiste ${esc(irronnutPiste)} poistettiin
+         valinnasta: siirsit kirjauksen kauas siitä. Valitse piste uudelleen, jos mittaat
+         sitä.</span>`
+      : "";
+
     sijaintitila.innerHTML = `
       <span class="label">Mittauspisteen koordinaatti</span>
       <b class="sijaintitila__arvo">${esc(koordinaatti(tila.lat, tila.lon))}</b>
-      <span class="sijaintitila__meta">${esc(lahdeteksti())}${lahin}</span>`;
+      <span class="sijaintitila__meta">${esc(lahdeteksti())}${lahin}</span>
+      ${varoitus}`;
   }
 
   function valitsePiste(id, siirraSijainti) {
     pisteValinta.value = id;
+    irronnutPiste = "";
     const p = pisteet.find((x) => x.id === id);
     if (p && siirraSijainti) {
       tila.lat = p.lat;
@@ -361,16 +379,40 @@ async function kaynnista(juuri) {
     }
   }
 
+  // Kerrotaan tilarivillä, jos valinta tyhjennettiin. Muuten pisteen
+  // katoaminen lomakkeesta näyttäisi siltä, että lomake unohti syötteen itse.
+  let irronnutPiste = "";
+
+  /**
+   * Tyhjentää pistevalinnan, kun kirjattava sijainti on siirretty kauas
+   * valitusta pisteestä. Ilman tätä lomake väittäisi mittauksen tehdyn siinä
+   * pisteessä, vaikka koordinaatti olisi kilometrien päässä – ja väite
+   * tallentuisi aineistoon.
+   *
+   * Poikkeus on pisteen sijainnin korjaus: jos mittaaja on rastittanut sen,
+   * hän on nimenomaan siirtämässä pistettä oikeaan paikkaansa, eikä valintaa
+   * saa viedä alta.
+   */
+  function irrotaVanhentunutPiste() {
+    const valittu = pisteet.find((p) => p.id === pisteValinta.value);
+    if (!valittu || kentat.korjaa.checked) return;
+    if (etaisyys(tila.lat, tila.lon, valittu.lat, valittu.lon) <= PISTEEN_SIETO_M) return;
+    pisteValinta.value = "";
+    irronnutPiste = valittu.id;
+  }
+
   kirjausMerkki.on("dragend", () => {
     const { lat, lng } = kirjausMerkki.getLatLng();
     tila.lat = lat;
     tila.lon = lng;
     tila.lahde = "kartta";
     tila.tarkkuus = null;
+    irrotaVanhentunutPiste();
     paivitaSijainti();
   });
 
   pisteValinta.addEventListener("change", () => {
+    irronnutPiste = "";
     if (pisteValinta.value) valitsePiste(pisteValinta.value, true);
     else paivitaSijainti();
   });
@@ -452,6 +494,7 @@ async function kaynnista(juuri) {
     const osuma = lahinPiste(pisteet, tila.lat, tila.lon);
     if (!osuma) return;
     pisteValinta.value = osuma.piste.id;
+    irronnutPiste = "";
     paivitaSijainti();
   }
 
