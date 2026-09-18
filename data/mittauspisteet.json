@@ -1,0 +1,314 @@
+{
+ "lahde": {
+  "nimi": "Pro Kuolimo – näkösyvyysmittaustulokset 19.11.2025",
+  "url": "aineistot/2025-11-19-pro-kuolimo-nakosyvyysmittaustulokset.pdf"
+ },
+ "kohdistus": {
+  "menetelma": "Raportin karttakuvan sijaintimerkit. Kuva on kohdistettu koordinaatistoon sovittamalla se mittauspisteiden paikannimien OpenStreetMap-sijainteihin (pienin neliösumma, 9 vertailupistettä).",
+  "vertailupisteita": 9,
+  "jaannosvirhe_rms_m": 610,
+  "huomio": "Sijainnit ovat arvioita, tyypillisesti 0,5–1 km:n päässä oikeasta. Korjaa maastossa kirjaussivulla."
+ },
+ "pisteet": [
+  {
+   "id": "A1",
+   "alue": "A",
+   "alueen_nimi": "Isoselkä",
+   "nimi": "Torvisaari läntinen",
+   "lat": 61.2299,
+   "lon": 27.61887,
+   "tarkkuus": "arvio",
+   "kalvoja": 7
+  },
+  {
+   "id": "A2",
+   "alue": "A",
+   "alueen_nimi": "Isoselkä",
+   "nimi": "Kuolimonsalmen suu",
+   "lat": 61.24309,
+   "lon": 27.56948,
+   "tarkkuus": "arvio",
+   "kalvoja": 6
+  },
+  {
+   "id": "A3",
+   "alue": "A",
+   "alueen_nimi": "Isoselkä",
+   "nimi": "Pyhä Paula (puhdistamon suu)",
+   "lat": 61.2193,
+   "lon": 27.57318,
+   "tarkkuus": "arvio",
+   "kalvoja": 6
+  },
+  {
+   "id": "A4",
+   "alue": "A",
+   "alueen_nimi": "Isoselkä",
+   "nimi": "Kinkosalmi luode",
+   "lat": 61.22574,
+   "lon": 27.5418,
+   "tarkkuus": "arvio",
+   "kalvoja": 6
+  },
+  {
+   "id": "B1",
+   "alue": "B",
+   "alueen_nimi": "Pappilanlahti–Kaijanlahti",
+   "nimi": "Leinvihko länsi",
+   "lat": 61.21432,
+   "lon": 27.63948,
+   "tarkkuus": "arvio",
+   "kalvoja": 7
+  },
+  {
+   "id": "B2",
+   "alue": "B",
+   "alueen_nimi": "Pappilanlahti–Kaijanlahti",
+   "nimi": "Uuhijoen suu (uusi)",
+   "lat": 61.20914,
+   "lon": 27.64157,
+   "tarkkuus": "arvio",
+   "kalvoja": 6
+  },
+  {
+   "id": "B3",
+   "alue": "B",
+   "alueen_nimi": "Pappilanlahti–Kaijanlahti",
+   "nimi": "Kaijanlahti – pohjoinen",
+   "lat": 61.20767,
+   "lon": 27.68532,
+   "tarkkuus": "arvio",
+   "kalvoja": 6
+  },
+  {
+   "id": "B4",
+   "alue": "B",
+   "alueen_nimi": "Pappilanlahti–Kaijanlahti",
+   "nimi": "Kaijanlahti – etelä",
+   "lat": 61.19908,
+   "lon": 27.69178,
+   "tarkkuus": "arvio",
+   "kalvoja": 6
+  },
+  {
+   "id": "C1",
+   "alue": "C",
+   "alueen_nimi": "Kirvesselkä",
+   "nimi": "Kiesilänjoen suu",
+   "lat": 61.27129,
+   "lon": 27.41573,
+   "tarkkuus": "arvio",
+   "kalvoja": 7
+  },
+  {
+   "id": "C2",
+   "alue": "C",
+   "alueen_nimi": "Kirvesselkä",
+   "nimi": "Kirvessalmi",
+   "lat": 61.28241,
+   "lon": 27.47857,
+   "tarkkuus": "arvio",
+   "kalvoja": 6
+  },
+  {
+   "id": "D1",
+   "alue": "D",
+   "alueen_nimi": "Morovanselkä",
+   "nimi": "Morovanselkä eteläinen",
+   "lat": 61.26646,
+   "lon": 27.50627,
+   "tarkkuus": "arvio",
+   "kalvoja": 6
+  },
+  {
+   "id": "D2",
+   "alue": "D",
+   "alueen_nimi": "Morovanselkä",
+   "nimi": "Morovanselkä pohjoinen",
+   "lat": 61.26691,
+   "lon": 27.45617,
+   "tarkkuus": "arvio",
+   "kalvoja": 5
+  },
+  {
+   "id": "E1",
+   "alue": "E",
+   "alueen_nimi": "Suomenniemi",
+   "nimi": "Puhdistamon suu",
+   "lat": 61.33982,
+   "lon": 27.41066,
+   "tarkkuus": "arvio",
+   "kalvoja": 5
+  },
+  {
+   "id": "E2",
+   "alue": "E",
+   "alueen_nimi": "Suomenniemi",
+   "nimi": "Kuhalahti",
+   "lat": 61.35236,
+   "lon": 27.2827,
+   "tarkkuus": "arvio",
+   "kalvoja": 6
+  },
+  {
+   "id": "E3",
+   "alue": "E",
+   "alueen_nimi": "Suomenniemi",
+   "nimi": "Muuriaissaari etelä",
+   "lat": 61.36808,
+   "lon": 27.31925,
+   "tarkkuus": "arvio",
+   "kalvoja": 7
+  },
+  {
+   "id": "F1",
+   "alue": "F",
+   "alueen_nimi": "Pylkönselkä–Kärnäkoski",
+   "nimi": "Kärnäkosken suu",
+   "lat": 61.23471,
+   "lon": 27.6797,
+   "tarkkuus": "arvio",
+   "kalvoja": 6
+  },
+  {
+   "id": "F2",
+   "alue": "F",
+   "alueen_nimi": "Pylkönselkä–Kärnäkoski",
+   "nimi": "Tupasaari itä",
+   "lat": 61.24531,
+   "lon": 27.66821,
+   "tarkkuus": "arvio",
+   "kalvoja": 6
+  },
+  {
+   "id": "G1",
+   "alue": "G",
+   "alueen_nimi": "Parranselkä–Partakoski",
+   "nimi": "Orrain suu",
+   "lat": 61.28247,
+   "lon": 27.63389,
+   "tarkkuus": "arvio",
+   "kalvoja": 6
+  },
+  {
+   "id": "G2",
+   "alue": "G",
+   "alueen_nimi": "Parranselkä–Partakoski",
+   "nimi": "Partakosken reitti",
+   "lat": 61.27375,
+   "lon": 27.66757,
+   "tarkkuus": "arvio",
+   "kalvoja": 6
+  },
+  {
+   "id": "H1",
+   "alue": "H",
+   "alueen_nimi": "Kiesilänjoen valuma-alue",
+   "nimi": "Korpijärvi itä – Sulunlahti länsi",
+   "lat": 61.25253,
+   "lon": 27.21686,
+   "tarkkuus": "arvio",
+   "kalvoja": 6
+  },
+  {
+   "id": "H2",
+   "alue": "H",
+   "alueen_nimi": "Kiesilänjoen valuma-alue",
+   "nimi": "Korpijärvi länsi – Sääskisaari länsi",
+   "lat": 61.25563,
+   "lon": 27.10787,
+   "tarkkuus": "arvio",
+   "kalvoja": 6
+  },
+  {
+   "id": "H3",
+   "alue": "H",
+   "alueen_nimi": "Kiesilänjoen valuma-alue",
+   "nimi": "Rautjärvi – Kuuponniemi pohjoinen",
+   "lat": 61.15107,
+   "lon": 27.31062,
+   "tarkkuus": "arvio",
+   "kalvoja": 7
+  },
+  {
+   "id": "H4",
+   "alue": "H",
+   "alueen_nimi": "Kiesilänjoen valuma-alue",
+   "nimi": "Virmajärvi – Haudanselkä lounas",
+   "lat": 61.13798,
+   "lon": 27.48359,
+   "tarkkuus": "arvio",
+   "kalvoja": 6
+  },
+  {
+   "id": "H5",
+   "alue": "H",
+   "alueen_nimi": "Kiesilänjoen valuma-alue",
+   "nimi": "Virmajärvi – Kuljunselkä lounas",
+   "lat": 61.15592,
+   "lon": 27.42499,
+   "tarkkuus": "arvio",
+   "kalvoja": 6
+  },
+  {
+   "id": "H6",
+   "alue": "H",
+   "alueen_nimi": "Kiesilänjoen valuma-alue",
+   "nimi": "Kukasjärvi – Vääräsaari etelä",
+   "lat": 61.2322,
+   "lon": 27.3138,
+   "tarkkuus": "arvio",
+   "kalvoja": 1
+  },
+  {
+   "id": "H7",
+   "alue": "H",
+   "alueen_nimi": "Kiesilänjoen valuma-alue",
+   "nimi": "",
+   "lat": 61.19009,
+   "lon": 27.35161,
+   "tarkkuus": "arvio",
+   "kalvoja": 3
+  },
+  {
+   "id": "H8",
+   "alue": "H",
+   "alueen_nimi": "Kiesilänjoen valuma-alue",
+   "nimi": "Säänjärvi – Hujasenvuori",
+   "lat": 61.16077,
+   "lon": 27.55139,
+   "tarkkuus": "arvio",
+   "kalvoja": 4
+  },
+  {
+   "id": "H9",
+   "alue": "H",
+   "alueen_nimi": "Kiesilänjoen valuma-alue",
+   "nimi": "Säänjärvi – Hujasensaari etelä",
+   "lat": 61.14747,
+   "lon": 27.56707,
+   "tarkkuus": "arvio",
+   "kalvoja": 4
+  },
+  {
+   "id": "J1",
+   "alue": "J",
+   "alueen_nimi": "Uuhijoen valuma-alue",
+   "nimi": "Säynjärvi – Suurensaarenselkä",
+   "lat": 61.18623,
+   "lon": 27.55878,
+   "tarkkuus": "arvio",
+   "kalvoja": 3
+  },
+  {
+   "id": "J2",
+   "alue": "J",
+   "alueen_nimi": "Uuhijoen valuma-alue",
+   "nimi": "Säynjärvi – Hiidenlahti",
+   "lat": 61.17972,
+   "lon": 27.58542,
+   "tarkkuus": "arvio",
+   "kalvoja": 3
+  }
+ ]
+}
