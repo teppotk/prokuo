@@ -1594,6 +1594,13 @@ p {
   max-width: 48rem;
 }
 
+/* Kirjaussivu on työkalu, ei luettavaa tekstiä, joten se saa ylittää sivuston
+   74 rem:n lukumitan. Leveys on rem-mitta, joten se kasvaa selaimen
+   fonttikoon mukana eikä pakota kolmea saraketta ahtaalle. */
+.wrap--tyokalu {
+  max-width: 102rem;
+}
+
 .pagehead--tiivis {
   padding-block: clamp(1.75rem, 5vw, 3rem);
 }
@@ -2004,10 +2011,15 @@ p {
 }
 
 /* --- Kirjausnäkymän asettelu --------------------------------------------- */
-/* Puhelimella pystysarake: kartta, lomake, lista. Työpöydällä lomake nousee
-   kartan viereen ja tallennetut kirjaukset kartan alle, jotta juuri tallennettu
-   rivi on samassa näkymässä kuin lomake – muuten tallennus näyttää siltä, ettei
-   mitään tapahtunut. */
+/* Puhelimella pystysarake: kartta, lomake, lista.
+
+   Työpöydällä lomake nousee kartan viereen ja tallennetut kirjaukset kartan
+   alle, jotta juuri tallennettu rivi on samassa näkymässä kuin lomake – muuten
+   tallennus näyttää siltä, ettei mitään tapahtunut.
+
+   Isolla näytöllä kaikki kolme mahtuvat rinnakkain. Molemmat rajat ovat
+   rem-mittoja, joten suurennettu selaimen fonttikoko siirtää vaihdon isommalle
+   näytölle sen sijaan että sarakkeet ahtautuisivat. */
 .kirjausnakyma {
   display: grid;
   gap: 1.5rem;
@@ -2026,22 +2038,44 @@ p {
     grid-row: 1;
   }
 
-  /* Kartta on työpöydällä vain puolet leveydestä, joten se saa lisää korkeutta
-     – muuten mittauspisteet jäävät liian lähelle toisiaan osuttaviksi. */
-  .kirjausnakyma .kartta--kirjaus {
-    height: clamp(22rem, 48vh, 32rem);
-  }
-
   .kirjausnakyma__lomake {
     grid-column: 2;
     grid-row: 1 / span 2;
     margin-top: 0;
   }
 
-  .kirjausnakyma__lista {
+  /* Kahden luokan valitsin on tarpeen: .kirjaukset-säännöt tulevat tässä
+     tiedostossa myöhemmin, joten yhden luokan nollaus häviäisi niille. */
+  .kirjausnakyma .kirjausnakyma__lista {
     grid-column: 1;
     grid-row: 2;
     margin-top: 0;
+  }
+
+  /* Kartta on työpöydällä vain osa leveydestä, joten se saa lisää korkeutta
+     – muuten mittauspisteet jäävät liian lähelle toisiaan osuttaviksi. */
+  .kirjausnakyma .kartta--kirjaus {
+    height: clamp(22rem, 48vh, 32rem);
+  }
+}
+
+@media (min-width: 86rem) {
+  .kirjausnakyma {
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .kirjausnakyma__lomake {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  /* Omana sarakkeenaan lista alkaa samalta riviltä kuin kartta, joten sitä ei
+     enää eroteta yläviivalla kuten kartan alla ollessaan. */
+  .kirjausnakyma .kirjausnakyma__lista {
+    grid-column: 3;
+    grid-row: 1;
+    padding-top: 0;
+    border-top: 0;
   }
 }
 
