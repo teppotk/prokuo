@@ -91,9 +91,14 @@ volunteer uses in the boat. `assets/js/kartta-apu.js` holds what they share
   `try`/`catch` on the page can see — it took down both map pages at once once
   already. **Never add an export to `site.js` for a new module to import; put
   shared new code in a new file**, which cannot be stale.
-- The passphrase on `kirjaa.html` is **not security**; it is a doorbell. It is an
-  FNV-1a hash in `TUNNUS_TIIVISTE` (currently `kuolimo2026`), changed by running
-  `prokuolimoTiiviste("…")` in the console. Nothing sensitive may be logged there.
+- The passphrase on `kirjaa.html` is **currently switched off**:
+  `TUNNUS_KAYTOSSA = false`, so the gate opens on any submit including an empty
+  one. Turning it back on means that constant *and* restoring the input's
+  `required` attribute and the gate's wording in `kirjaa.html` — without
+  `required` removed, an empty form never fires `submit` at all, which is why
+  the two go together. The hash (`kuolimo2026`) stays in `TUNNUS_TIIVISTE`; a new
+  one comes from `prokuolimoTiiviste("…")` in the console. Even switched on it
+  was never security, only a doorbell, so nothing sensitive may be logged there.
 - Logged measurements live in `localStorage` only and are exported as JSON or
   CSV (semicolon-separated, decimal comma, BOM — Finnish Excel). Database
   storage is an open decision, not a finished one; keep the export path working.

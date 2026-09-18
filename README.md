@@ -66,11 +66,16 @@ yksikäsitteisesti. Tarkista ne PDF:stä ennen julkaisua.
 on mittaajien työkalu, jolla näkösyvyysmittauksen voi kirjata maastossa;
 se ei ole navigaatiossa eikä hakukoneissa (`noindex` + `robots.txt`).
 
-Kirjaussivun tunnusluku on **`kuolimo2026`**. Vaihto: avaa sivu, laske uusi
-tiiviste selaimen konsolissa komennolla `prokuolimoTiiviste("uusi tunnus")`
-ja korvaa `TUNNUS_TIIVISTE` tiedostossa `assets/js/kirjaa.js`. Tunnusluku ei
-ole tietoturvaa vaan este satunnaiselle kävijälle – sivusto on staattinen,
-joten palvelinpuolen tarkistusta ei ole.
+**Tunnuslukua ei toistaiseksi kysytä:** portti aukeaa millä tahansa
+syötteellä, myös tyhjällä. Käyttöönotto on `TUNNUS_KAYTOSSA = true`
+tiedostossa `assets/js/kirjaa.js`; palauta samalla kentän `required`-määre ja
+portin tekstit `kirjaa.html`:ssä. Tunnusluku on tallessa (`kuolimo2026`), ja
+uuden saa laskettua selaimen konsolissa komennolla
+`prokuolimoTiiviste("uusi tunnus")`.
+
+Tunnusluku ei olisi tietoturvaa vaan este satunnaiselle kävijälle – sivusto on
+staattinen, joten palvelinpuolen tarkistusta ei ole. Nyt kun sitäkään ei ole,
+sivu on auki kaikille jotka tietävät osoitteen.
 
 Kirjaukset tallentuvat toistaiseksi vain selaimen `localStorage`-muistiin ja
 viedään sieltä JSON- tai CSV-tiedostona. Tietokantatallennus on avoin asia.

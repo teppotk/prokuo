@@ -44,6 +44,18 @@ function tiiviste(teksti) {
 window.prokuolimoTiiviste = tiiviste;
 
 const TUNNUS_TIIVISTE = "8d23c769";
+
+/**
+ * Tunnusluku on toistaiseksi pois käytöstä: portti aukeaa millä tahansa
+ * syötteellä, myös tyhjällä. Tarkistus on jätetty koodiin tallelle, joten
+ * käyttöönotto on tämän yhden arvon vaihtaminen takaisin todeksi – ja samalla
+ * kirjaa.html:n portin tekstin ja kentän required-määreen palauttaminen.
+ *
+ * Huom. ilman tunnuslukua sivu on käytännössä auki kaikille, jotka tietävät
+ * osoitteen. Sivu on edelleen noindex ja estetty robots.txt:ssä, mutta se
+ * estää vain hakukoneita, ei ihmisiä.
+ */
+const TUNNUS_KAYTOSSA = false;
 const AVAIN_PORTTI = "prokuolimo.portti";
 const AVAIN_KIRJAUKSET = "prokuolimo.kirjaukset";
 const AVAIN_KORJAUKSET = "prokuolimo.pistekorjaukset";
@@ -608,7 +620,7 @@ function init() {
   const viesti = portti.querySelector("[data-portti-virhe]");
   portti.querySelector("form").addEventListener("submit", (e) => {
     e.preventDefault();
-    if (tiiviste(kentta.value.trim()) !== TUNNUS_TIIVISTE) {
+    if (TUNNUS_KAYTOSSA && tiiviste(kentta.value.trim()) !== TUNNUS_TIIVISTE) {
       viesti.hidden = false;
       kentta.value = "";
       kentta.focus();
@@ -618,7 +630,7 @@ function init() {
     sessionStorage.setItem(AVAIN_PORTTI, TUNNUS_TIIVISTE);
     avaa();
   });
-  kentta.focus();
+  if (TUNNUS_KAYTOSSA) kentta.focus();
 }
 
 init();
