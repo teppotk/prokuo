@@ -176,6 +176,26 @@ export async function loadJSON(path, statusEl) {
   }
 }
 
+/**
+ * Näkösyvyyden luokkarajat metreinä. Tunnus 1 = sameinta, 6 = kirkkainta.
+ * Sama sarja ohjaa rekisteritaulukon soluja, karttamerkkejä ja selitteitä,
+ * joten se on määritelty vain tässä.
+ */
+export const BINS = [
+  { bin: 1, min: 0, label: "alle 2" },
+  { bin: 2, min: 2, label: "2–3" },
+  { bin: 3, min: 3, label: "3–4" },
+  { bin: 4, min: 4, label: "4–5" },
+  { bin: 5, min: 5, label: "5–6" },
+  { bin: 6, min: 6, label: "6 tai yli" },
+];
+
+export function binOf(value) {
+  let hit = BINS[0];
+  for (const b of BINS) if (value >= b.min) hit = b;
+  return hit.bin;
+}
+
 /** 2026-05-07 -> 7.5.2026 */
 export function fiDate(iso) {
   const [y, m, d] = String(iso).split("-");

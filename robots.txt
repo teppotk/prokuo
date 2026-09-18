@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
+# Kirjaussivu on mittaajien työkalu, ei julkaistavaa sisältöä.
+Disallow: /kirjaa.html
+Disallow: /kirjaa-sw.js
 
 Sitemap: https://prokuolimo.fi/sitemap.xml

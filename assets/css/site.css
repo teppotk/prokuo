@@ -811,7 +811,10 @@ p {
 .round__stat,
 .tier__price,
 .record td,
-.record th {
+.record th,
+.pin,
+.aikajana__nappi,
+.kirjaus__aika {
   overflow-wrap: normal;
   hyphens: none;
 }
@@ -1580,6 +1583,478 @@ p {
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
+}
+
+/* ==========================================================================
+   Kartta, aikajana ja mittausten kirjaus
+   (kartta.html, kirjaa.html – ks. assets/js/kartta-apu.js)
+   ========================================================================== */
+
+.wrap--kapea {
+  max-width: 48rem;
+}
+
+.pagehead--tiivis {
+  padding-block: clamp(1.75rem, 5vw, 3rem);
+}
+
+/* --- Karttakehys --------------------------------------------------------- */
+.kartta {
+  height: clamp(20rem, 55vh, 34rem);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  background: var(--paper-3);
+  /* Leafletin omat paneelit ovat absoluuttisia; tämä pitää ne kehyksen sisällä. */
+  isolation: isolate;
+  z-index: 0;
+}
+
+.kartta--kirjaus {
+  height: clamp(17rem, 42vh, 26rem);
+}
+
+/* Laattoja ei käännetä negatiiviksi – kartan pitää näyttää kartalta. Tummassa
+   tilassa kirkkautta lasketaan sen verran, ettei valkoinen laatta häikäise. */
+@media (prefers-color-scheme: dark) {
+  .leaflet-tile-pane {
+    filter: brightness(0.82) contrast(1.06) saturate(0.9);
+  }
+}
+
+.leaflet-container {
+  font-family: var(--sans);
+  font-size: var(--fs-micro);
+  background: var(--paper-3);
+}
+
+.leaflet-container a {
+  color: var(--water);
+}
+
+.leaflet-control-attribution {
+  background: color-mix(in srgb, var(--paper) 86%, transparent);
+  color: var(--ink-2);
+}
+
+.leaflet-bar a,
+.leaflet-bar a:hover {
+  background: var(--paper);
+  color: var(--ink);
+  border-bottom-color: var(--rule);
+  /* Zoom-painikkeet ovat sormella painettavia. */
+  width: 2.25rem;
+  height: 2.25rem;
+  line-height: 2.25rem;
+  font-size: 1.25rem;
+}
+
+/* --- Karttamerkit -------------------------------------------------------- */
+/* Merkki on divIcon, joten värit tulevat samasta --b1…--b6-sarjasta kuin
+   rekisteritaulukossa ja tumma tila toimii ilman erillistä logiikkaa. */
+.pin {
+  display: grid;
+  place-items: center;
+  width: 2.375rem;
+  height: 2.375rem;
+  border-radius: 50%;
+  border: 2px solid var(--paper);
+  box-shadow: var(--shadow);
+  font-family: var(--mono);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1;
+  overflow-wrap: normal;
+  background: var(--paper-3);
+  color: var(--ink);
+}
+
+.pin b {
+  font-weight: 500;
+}
+
+/* Pistetunnus on merkin alla pienenä, jotta lukema pysyy pääasiana. */
+.pin i {
+  position: absolute;
+  top: 100%;
+  margin-top: 2px;
+  font-style: normal;
+  font-size: var(--fs-label);
+  letter-spacing: 0.04em;
+  color: var(--ink-2);
+  text-shadow: 0 0 3px var(--paper), 0 0 3px var(--paper);
+}
+
+.pin[data-bin="1"] { background: var(--b1); color: var(--b1-fg); }
+.pin[data-bin="2"] { background: var(--b2); color: var(--b2-fg); }
+.pin[data-bin="3"] { background: var(--b3); color: var(--b3-fg); }
+.pin[data-bin="4"] { background: var(--b4); color: var(--b4-fg); }
+.pin[data-bin="5"] { background: var(--b5); color: var(--b5-fg); }
+.pin[data-bin="6"] { background: var(--b6); color: var(--b6-fg); }
+
+/* Ei mittausta kyseisellä kierroksella: tyhjä rengas, ei nolla. */
+.pin--tyhja {
+  background: transparent;
+  border: 2px dashed var(--rule-strong);
+  box-shadow: none;
+}
+
+/* Sijainti on vasta arvio, ei maastossa tarkistettu. */
+.pin--arvio {
+  border-style: dashed;
+}
+
+/* Kirjattava sijainti: nieriän väri, koska se on sivun tärkein toiminto. */
+.pin--kirjaus {
+  width: 2.625rem;
+  height: 2.625rem;
+  background: transparent;
+  border: 3px solid var(--nieria-bright);
+  box-shadow: 0 0 0 2px var(--paper);
+  cursor: grab;
+}
+
+.pin--kirjaus::after {
+  content: "";
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background: var(--nieria-bright);
+}
+
+/* Oma GPS-sijainti on eri asia kuin kirjattava sijainti. */
+.pin--oma {
+  width: 1.125rem;
+  height: 1.125rem;
+  background: var(--water);
+  border: 2px solid var(--paper);
+}
+
+.oma-tarkkuus {
+  stroke: var(--water);
+  stroke-width: 1;
+  fill: var(--water);
+  fill-opacity: 0.12;
+}
+
+/* --- Ponnahdusikkuna ----------------------------------------------------- */
+.leaflet-popup-content-wrapper {
+  background: var(--paper);
+  color: var(--ink);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.leaflet-popup-tip {
+  background: var(--paper);
+}
+
+.leaflet-popup-content {
+  margin: 0.9rem 1rem;
+  font-size: var(--fs-small);
+  line-height: 1.5;
+}
+
+.popup h3 {
+  margin-bottom: 0.15rem;
+}
+
+.popup__meta {
+  font-size: var(--fs-micro);
+  color: var(--ink-2);
+  margin-bottom: 0.6rem;
+}
+
+.popup__sarja {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.popup__sarja li {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.popup__sarja em {
+  font-style: normal;
+  font-size: var(--fs-micro);
+  color: var(--ink-2);
+}
+
+.popup__sarja b {
+  font-family: var(--mono);
+  font-weight: 500;
+  overflow-wrap: normal;
+  padding: 0.05rem 0.4rem;
+  border-radius: 2px;
+}
+
+.popup__sarja b[data-bin="1"] { background: var(--b1); color: var(--b1-fg); }
+.popup__sarja b[data-bin="2"] { background: var(--b2); color: var(--b2-fg); }
+.popup__sarja b[data-bin="3"] { background: var(--b3); color: var(--b3-fg); }
+.popup__sarja b[data-bin="4"] { background: var(--b4); color: var(--b4-fg); }
+.popup__sarja b[data-bin="5"] { background: var(--b5); color: var(--b5-fg); }
+.popup__sarja b[data-bin="6"] { background: var(--b6); color: var(--b6-fg); }
+
+.popup__note {
+  margin-top: 0.6rem;
+  font-size: var(--fs-micro);
+  color: var(--ink-2);
+}
+
+/* --- Aikajana ------------------------------------------------------------ */
+.aikajana {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+}
+
+.aikajana__nappi {
+  flex: none;
+  width: 2.75rem;
+  height: 2.75rem;
+  display: grid;
+  place-items: center;
+  font-size: 1.0625rem;
+  font-family: var(--sans);
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.aikajana__nappi:hover {
+  border-color: var(--ink);
+  background: var(--paper-3);
+}
+
+.aikajana__nappi--soita {
+  color: var(--nieria);
+  border-color: var(--nieria-bright);
+}
+
+/* Liuku saa kasvaa, mutta sen on myös voitava kutistua kapealla näytöllä. */
+.aikajana__liuku {
+  flex: 1 1 min(14rem, 100%);
+  min-width: 0;
+  display: block;
+}
+
+.aikajana__liuku input {
+  width: 100%;
+  min-width: 0;
+  accent-color: var(--nieria-bright);
+  height: 2.75rem;
+}
+
+.aikajana__tila {
+  flex: 1 1 100%;
+  font-family: var(--mono);
+  font-size: var(--fs-small);
+  color: var(--ink-2);
+}
+
+.aikajana__tila b {
+  font-family: var(--sans);
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* --- Portti -------------------------------------------------------------- */
+.portti__lomake {
+  display: grid;
+  gap: 1rem;
+  max-width: 28rem;
+  padding: clamp(1.25rem, 4vw, 2rem);
+  background: var(--paper-2);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
+
+.portti__lomake .btn {
+  justify-content: center;
+}
+
+/* --- Kirjauslomake ------------------------------------------------------- */
+.lomake {
+  display: grid;
+  gap: 1.1rem;
+  margin-top: 1.5rem;
+}
+
+.lomake__rivi {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  align-items: end;
+}
+
+/* Kapea kenttä saa kutistua: kiinteä minimi työntäisi sivua sivusuunnassa,
+   kun lukija on suurentanut selaimen fonttikokoa. */
+.field--kapea {
+  flex: 1 1 min(9rem, 100%);
+}
+
+.field textarea {
+  font-family: var(--sans);
+  font-size: var(--fs-small);
+  padding: 0.55rem 0.7rem;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  min-width: 0;
+  width: 100%;
+  resize: vertical;
+}
+
+.field input,
+.field select,
+.field textarea {
+  max-width: none;
+}
+
+/* Sormella osuttavat kentät: 44 px on pienin kohtuullinen kosketuskohde. */
+.lomake .field input,
+.lomake .field select,
+.portti__lomake .field input {
+  min-height: 2.75rem;
+  font-size: var(--fs-body);
+}
+
+.lomake [data-nakosyvyys] {
+  font-family: var(--mono);
+}
+
+.btn--nyt {
+  flex: none;
+  min-height: 2.75rem;
+}
+
+.btn--tallenna {
+  justify-content: center;
+  min-height: 3.25rem;
+  font-size: var(--fs-body);
+}
+
+.btn-row--kirjaus {
+  margin-top: 0.75rem;
+}
+
+.valinta {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.7rem;
+  align-items: start;
+  font-size: var(--fs-small);
+  color: var(--ink-2);
+}
+
+.valinta input {
+  width: 1.4rem;
+  height: 1.4rem;
+  margin-top: 0.15rem;
+  accent-color: var(--nieria-bright);
+}
+
+.lomake__virhe {
+  font-size: var(--fs-small);
+  color: var(--nieria);
+  padding-left: 0.9rem;
+  border-left: 2px solid var(--nieria-bright);
+}
+
+.sijaintitila {
+  margin-top: 0.9rem;
+  font-size: var(--fs-small);
+  color: var(--ink-2);
+}
+
+.sijaintitila em {
+  font-style: normal;
+}
+
+/* --- Tallennetut kirjaukset ---------------------------------------------- */
+.kirjaukset {
+  margin-top: 2.5rem;
+  padding-top: 1.75rem;
+  border-top: 1px solid var(--rule);
+}
+
+.kirjaukset h2 {
+  margin-bottom: 0.6rem;
+}
+
+.kirjaukset .btn-row {
+  margin-top: 1.25rem;
+}
+
+.kirjauslista {
+  list-style: none;
+  margin: 1.25rem 0 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.kirjaus {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 0.9rem;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.kirjaus__arvo {
+  flex: none;
+  font-size: 1.25rem;
+  color: var(--water);
+}
+
+.kirjaus__paikka {
+  flex: 1 1 min(12rem, 100%);
+  min-width: 0;
+  font-size: var(--fs-small);
+  color: var(--ink-2);
+}
+
+.kirjaus__paikka b {
+  display: block;
+  font-family: var(--mono);
+  font-weight: 500;
+  overflow-wrap: normal;
+  color: var(--ink);
+}
+
+.kirjaus__aika {
+  flex: none;
+  font-size: var(--fs-micro);
+  color: var(--ink-2);
+}
+
+.kirjaus__poista {
+  flex: none;
+  font-family: var(--sans);
+  font-size: var(--fs-micro);
+  color: var(--ink-2);
+  background: none;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 0.35rem 0.6rem;
+  cursor: pointer;
+}
+
+.kirjaus__poista:hover {
+  color: var(--nieria);
+  border-color: var(--nieria-bright);
 }
 
 @media print {

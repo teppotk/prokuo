@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Näkösyvyyskartta – Pro Kuolimo ry</title>
+<meta name="description" content="Kuolimon ja sen valuma-alueen näkösyvyysmittaukset kartalla. Aikajana kulkee mittauskierroksittain kesäkuusta 2024 lokakuuhun 2025.">
+<link rel="canonical" href="https://prokuolimo.fi/kartta.html">
+<meta name="theme-color" content="#edf1ee" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1412" media="(prefers-color-scheme: dark)">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="fi_FI">
+<meta property="og:title" content="Näkösyvyyskartta – Kuolimo ja valuma-alue">
+<meta property="og:description" content="Mittauspisteet kartalla ja aikajana, joka kulkee mittauskierroksittain.">
+<meta property="og:image" content="https://prokuolimo.fi/assets/img/og-kuva.jpg">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/fraunces-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/archivo-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/plexmono-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css">
+<script src="assets/vendor/leaflet/leaflet.js" defer></script>
+<script type="module" src="assets/js/site.js"></script>
+<script type="module" src="assets/js/kartta.js"></script>
+</head>
+<body>
+<site-header></site-header>
+<noscript>
+  <nav class="wrap noscript-nav" aria-label="Päävalikko">
+    <a href="index.html">Etusivu</a> ·
+    <a href="kuolimo.html">Kuolimo</a> ·
+    <a href="toiminta.html">Toiminta</a> ·
+    <a href="nakosyvyys.html">Näkösyvyys</a> ·
+    <a href="aineistot.html">Aineistot</a> ·
+    <a href="uutiset.html">Uutiset</a> ·
+    <a href="yhdistys.html">Yhdistys</a> ·
+    <a href="liity.html">Liity jäseneksi</a>
+  </nav>
+</noscript>
+
+<main id="main">
+
+  <section class="pagehead">
+    <div class="wrap">
+      <p class="label">Näkösyvyysrekisteri</p>
+      <h1>Mittaukset kartalla</h1>
+      <p class="lead">Sama aineisto kuin <a href="nakosyvyys.html">rekisteritaulukossa</a>,
+        mutta paikkaan sidottuna. Aikajana kulkee mittauskierroksittain, joten kartalta
+        näkee, missä vesi on kirkastunut ja missä tummunut.</p>
+    </div>
+  </section>
+
+  <section class="band band--tight">
+    <div class="wrap">
+      <div data-kartta>
+        <p class="status" data-status>Ladataan karttaa ja mittaustuloksia…</p>
+        <noscript><p class="status">Kartan selaaminen vaatii JavaScriptin.
+          <a href="nakosyvyys.html">Rekisteritaulukko</a> toimii ilman sitä, ja
+          <a href="aineistot/2025-11-19-pro-kuolimo-nakosyvyysmittaustulokset.pdf">mittausraportissa (PDF)</a>
+          on kartta jokaisesta kierroksesta.</p></noscript>
+      </div>
+    </div>
+  </section>
+
+  <section class="band band--tint">
+    <div class="wrap split">
+      <div class="stack">
+        <div class="head">
+          <p class="label">Kartan lukuohje</p>
+          <h2>Mitä kartalla näkyy</h2>
+        </div>
+        <div class="prose">
+          <p>Jokainen merkki on yksi mittauspiste. Merkin luku on kierroksen näkösyvyys
+            metreinä ja väri sen luokka: tummempi tarkoittaa kirkkaampaa vettä. Tyhjä
+            rengas tarkoittaa, ettei pisteellä mitattu kyseisellä kierroksella – se ei
+            ole nolla.</p>
+          <p>Maaliskuun kierros mitataan jäältä, ja siinä on mukana vain osa pisteistä.
+            Kartalla se näkyy tyhjien renkaiden määränä, ei huonompana tuloksena.</p>
+          <p>Merkkiä napauttamalla avautuu pisteen koko aikasarja: kaikki kierrokset ja
+            niiden lukemat allekkain.</p>
+          <p>Valuma-alueen pienet järvet ja lammet ovat luonnostaan tummempia kuin karu
+            ja kirkas Kuolimo. Kartalla ne erottuvat vaaleampina merkkeinä reunoilla.</p>
+        </div>
+      </div>
+      <div class="stack">
+        <div class="card">
+          <p class="card__num">Huom.</p>
+          <h3>Pisteiden sijainnit ovat arvioita</h3>
+          <p>Mittausraportissa ei ole pisteiden koordinaatteja. Sijainnit on johdettu
+            raportin karttakuvasta ja kohdistettu pisteiden paikannimien avulla, joten ne
+            ovat noin kilometrin tarkkuudella oikein – eivät mittauspaikan tarkkuudella.</p>
+          <p>Mittaajat tarkentavat sijainteja maastossa kirjauksen yhteydessä.</p>
+        </div>
+        <div class="card">
+          <p class="card__num">Lähde</p>
+          <h3>Mittausraportti</h3>
+          <p>Kartan luvut ovat samat kuin raportissa ja rekisteritaulukossa.</p>
+          <p><a href="aineistot/2025-11-19-pro-kuolimo-nakosyvyysmittaustulokset.pdf">Mittausraportti (PDF, 19.11.2025) →</a></p>
+        </div>
+        <div class="card">
+          <p class="card__num">Aineisto</p>
+          <h3>Vapaasti käytettävissä</h3>
+          <p>Mittaustulokset ja pisteiden sijainnit ovat ladattavissa koneluettavassa
+            muodossa.</p>
+          <p><a href="data/nakosyvyys.json">Mittaustulokset (JSON)</a> ·
+             <a href="data/mittauspisteet.json">Mittauspisteet (JSON)</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band band--deep">
+    <div class="wrap">
+      <div class="head head--deep">
+        <p class="label">Mukaan</p>
+        <h2>Yksi piste, 3–4 mittausta vuodessa</h2>
+      </div>
+      <p class="lead" style="max-width:52ch">Rekisteri kasvaa vain siksi, että vapaaehtoiset
+        käyvät mittaamassa. Jos sinulla on vene ja oma ranta, yksi piste riittää.</p>
+      <div class="btn-row" style="margin-top:1.75rem">
+        <a class="btn btn--ghost" href="nakosyvyys.html">Rekisteritaulukko</a>
+        <a class="btn btn--ghost" href="aineistot/2025-11-19-nakosyvyysmittausten-ohjeistus.pdf">Mittausohje (PDF)</a>
+        <a class="btn btn--primary" href="liity.html">Liity jäseneksi</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+<site-footer></site-footer>
+</body>
+</html>

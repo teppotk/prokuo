@@ -6,9 +6,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 The prokuolimo.fi website for Pro Kuolimo ry, a Finnish volunteer association
 protecting Lake Kuolimo. Hand-written static HTML/CSS/JS. **No build step, no
-framework, no server code, no external network requests at runtime** — fonts,
-images and data all ship with the site. Content is in Finnish; keep it that way,
-including code comments and commit messages.
+framework, no server code** — fonts, images and data all ship with the site.
+Content is in Finnish; keep it that way, including code comments and commit
+messages.
+
+**No external network requests at runtime, with one scoped exception:** the two
+map pages (`kartta.html`, `kirjaa.html`) fetch OpenStreetMap tiles. Leaflet
+itself is vendored in `assets/vendor/leaflet/`, like the fonts. Do not let this
+exception spread: the other eight pages must keep working with no network.
 
 ## Commands
 
@@ -18,6 +23,7 @@ python3 tools/check-links.py                # internal links, anchors, images
 python3 tools/check-links.py --ulkoiset     # also HEAD-checks external PDF links
 ./tools/build-images.sh                     # regenerate assets/img from media-source (ImageMagick)
 python3 tools/extract-nakosyvyys.py X.pdf > data/nakosyvyys.json
+python3 tools/johda-pistesijainnit.py X.pdf > data/mittauspisteet.json
 ```
 
 There is no test suite. `check-links.py` is the regression check — run it after
@@ -32,6 +38,13 @@ footer, and no data-driven content.
 **Eight pages at the repo root** (`index`, `kuolimo`, `toiminta`, `nakosyvyys`,
 `aineistot`, `uutiset`, `yhdistys`, `liity`). Prose and factual content live
 directly in the HTML so they work without JS and are indexable.
+
+**Two further pages sit outside the `NAV` array on purpose.** `kartta.html` is
+public but reached from `nakosyvyys.html`, not from the menu — eight nav items
+is the design. `kirjaa.html` is the field-logging tool: unlinked, `noindex`,
+`Disallow` in `robots.txt`, and behind a passphrase. Both are in
+`check-links.py`'s scope like any other page; `kartta.html` is in `sitemap.xml`
+and `kirjaa.html` deliberately is not.
 
 **Shared chrome comes from custom elements**, not from duplicated markup:
 `<site-header>` and `<site-footer>` are defined in `assets/js/site.js` and
@@ -59,6 +72,31 @@ treatment.
 **Contact details are intentionally duplicated** in the `YHTEYS` object in
 `site.js` (footer) and in `yhdistys.html` (full board list). Update both.
 
+## Maps and field logging
+
+`kartta.html` + `assets/js/kartta.js` render the register on a Leaflet map with
+a round-by-round timeline. `kirjaa.html` + `assets/js/kirjaa.js` is the tool a
+volunteer uses in the boat. `assets/js/kartta-apu.js` holds what they share
+(map creation, marker icons, distance).
+
+- Markers are `L.divIcon`s carrying `data-bin`, not Leaflet circles, so the
+  colours come from the same `--b1`…`--b6` ramp as the register table and dark
+  mode needs no extra logic. The measured number is always printed on the
+  marker — the same "never colour alone" rule as the table.
+- The passphrase on `kirjaa.html` is **not security**; it is a doorbell. It is an
+  FNV-1a hash in `TUNNUS_TIIVISTE` (currently `kuolimo2026`), changed by running
+  `prokuolimoTiiviste("…")` in the console. Nothing sensitive may be logged there.
+- Logged measurements live in `localStorage` only and are exported as JSON or
+  CSV (semicolon-separated, decimal comma, BOM — Finnish Excel). Database
+  storage is an open decision, not a finished one; keep the export path working.
+- `kirjaa-sw.js` is a service worker that caches the logging page's own files
+  and already-viewed map tiles, because the lake has poor coverage. It passes
+  everything else straight through, so it must not affect the other pages, and
+  it is network-first on purpose: its `RUNKO` list includes `site.css` and
+  `site.js`, and serving those from cache would freeze the whole site's styling
+  for anyone who had once opened the logging page. Still bump `VERSIO` when a
+  `RUNKO` file changes, so stale caches get swept.
+
 ## The näkösyvyys register
 
 `nakosyvyys.html` plus `assets/js/nakosyvyys.js` is the site's signature
@@ -72,6 +110,14 @@ Consequences to respect:
 
 - The PDF is the authoritative source. Never hand-edit `data/nakosyvyys.json`
   to "fix" a value; fix the extractor or the `ALIAS` table and re-run it.
+- `data/mittauspisteet.json` is derived too, by `tools/johda-pistesijainnit.py`,
+  which reads the orange location markers off the slide images. The report has no
+  coordinates at all, so the map image was fitted to the coordinate system using
+  the points' own place names as control points (OpenStreetMap, least squares,
+  RMS ≈ 0.6 km). **Every position is an estimate, roughly a kilometre out**, and
+  carries `"tarkkuus": "arvio"` to say so. Volunteers correct positions in the
+  field via `kirjaa.html`, and a correction becomes `"tarkkuus": "mitattu"` —
+  so re-running the tool would overwrite real measurements. Check the diff.
 - Missing cells are real (some points are not measured on some rounds, and the
   March round is measured from the ice with far fewer points). Render them as
   gaps, never as zeros.

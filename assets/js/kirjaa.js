@@ -1,0 +1,624 @@
+/**
+ * Näkösyvyysmittausten kirjaus maastossa (kirjaa.html).
+ *
+ * Sivu on tarkoitettu veneessä tai rannalla käytettäväksi: mittaaja näkee oman
+ * sijaintinsa kartalla, valitsee mittauspisteen, tarkentaa tarvittaessa
+ * sijainnin sormella ja kirjaa päivämäärän, kellonajan ja lukeman.
+ *
+ * TALLENNUS ON TOISTAISEKSI PAIKALLINEN. Kirjaukset menevät selaimen
+ * localStorageen, eivät mihinkään palvelimelle – tämä on prototyyppi, jolla
+ * työnkulku voidaan testata ennen kuin tietokannasta päätetään. Kirjaukset on
+ * siksi vietävä JSON- tai CSV-tiedostona ja toimitettava sihteerille.
+ * Selaimen tietojen tyhjennys poistaa kirjaukset, ja siitä varoitetaan sivulla.
+ *
+ * SALASANA EI OLE TIETOTURVAA. Koko sivusto on staattinen, joten mitään
+ * palvelinpuolen tarkistusta ei ole. Tunnusluku on vain este, joka pitää sivun
+ * pois satunnaisilta kävijöiltä ja hakukoneilta (sivulla on myös noindex ja
+ * robots.txt-esto). Älä kirjaa tänne mitään, mikä ei kestä julkisuutta.
+ */
+import { esc, loadJSON, fiNum, fiDate } from "./site.js";
+import {
+  luoKartta,
+  pisteMerkki,
+  pisteenNimi,
+  koordinaatti,
+  lahinPiste,
+} from "./kartta-apu.js";
+
+/* --- Tunnusluku ---------------------------------------------------------- */
+
+/**
+ * FNV-1a-tiiviste. Tarkoitus on vain se, ettei tunnusluku ole selväkielisenä
+ * lähdekoodissa. Vaihda tunnus laskemalla uusi arvo selaimen konsolissa:
+ *     window.prokuolimoTiiviste("uusi tunnus")
+ * ja korvaa TUNNUS_TIIVISTE sillä.
+ */
+function tiiviste(teksti) {
+  let h = 0x811c9dc5;
+  for (const merkki of "pro-kuolimo:" + teksti) {
+    h ^= merkki.codePointAt(0);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h.toString(16).padStart(8, "0");
+}
+window.prokuolimoTiiviste = tiiviste;
+
+const TUNNUS_TIIVISTE = "8d23c769";
+const AVAIN_PORTTI = "prokuolimo.portti";
+const AVAIN_KIRJAUKSET = "prokuolimo.kirjaukset";
+const AVAIN_KORJAUKSET = "prokuolimo.pistekorjaukset";
+const AVAIN_MITTAAJA = "prokuolimo.mittaaja";
+
+/* --- Paikallinen tallennus ----------------------------------------------- */
+
+function lue(avain, oletus) {
+  try {
+    const teksti = localStorage.getItem(avain);
+    return teksti ? JSON.parse(teksti) : oletus;
+  } catch (err) {
+    console.error(`Tallennuksen ${avain} luku epäonnistui:`, err);
+    return oletus;
+  }
+}
+
+function kirjoita(avain, arvo) {
+  try {
+    localStorage.setItem(avain, JSON.stringify(arvo));
+    return true;
+  } catch (err) {
+    console.error(`Tallennuksen ${avain} kirjoitus epäonnistui:`, err);
+    return false;
+  }
+}
+
+/* --- Aika ---------------------------------------------------------------- */
+
+/** Paikallinen päivämäärä muodossa 2026-09-18 (ei UTC, joka voi olla eri päivä). */
+function tanaan(d = new Date()) {
+  const p = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+function kello(d = new Date()) {
+  const p = (n) => String(n).padStart(2, "0");
+  return `${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+/* --- Vienti -------------------------------------------------------------- */
+
+const SARAKKEET = [
+  ["pvm", "Päivämäärä"],
+  ["klo", "Kello"],
+  ["piste", "Piste"],
+  ["pisteen_nimi", "Mittauspaikka"],
+  ["nakosyvyys", "Näkösyvyys (m)"],
+  ["lat", "Leveysaste"],
+  ["lon", "Pituusaste"],
+  ["sijainnin_lahde", "Sijainnin lähde"],
+  ["tarkkuus_m", "GPS-tarkkuus (m)"],
+  ["mittaaja", "Mittaaja"],
+  ["huomiot", "Huomiot"],
+];
+
+/** Puolipiste-eroteltu CSV ja desimaalipilkku: aukeaa suomalaisessa Excelissä. */
+function csv(kirjaukset) {
+  const kentta = (arvo) => {
+    const t = String(arvo ?? "").replace(/"/g, '""');
+    return /[";\n]/.test(t) ? `"${t}"` : t;
+  };
+  const luku = (arvo) => (arvo == null ? "" : String(arvo).replace(".", ","));
+  const numeeriset = new Set(["nakosyvyys", "lat", "lon", "tarkkuus_m"]);
+  const rivit = [SARAKKEET.map(([, otsikko]) => kentta(otsikko)).join(";")];
+  for (const k of kirjaukset) {
+    rivit.push(
+      SARAKKEET.map(([avain]) =>
+        kentta(numeeriset.has(avain) ? luku(k[avain]) : k[avain])
+      ).join(";")
+    );
+  }
+  // BOM, jotta Excel tunnistaa ääkköset.
+  return "﻿" + rivit.join("\r\n") + "\r\n";
+}
+
+function lataa(nimi, sisalto, tyyppi) {
+  const url = URL.createObjectURL(new Blob([sisalto], { type: tyyppi }));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = nimi;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* --- Sovellus ------------------------------------------------------------ */
+
+async function kaynnista(juuri) {
+  const status = juuri.querySelector("[data-status]");
+  const aineisto = await loadJSON("data/mittauspisteet.json", status);
+  if (!aineisto) return;
+
+  const korjaukset = lue(AVAIN_KORJAUKSET, {});
+  const pisteet = aineisto.pisteet.map((p) => ({ ...p, ...(korjaukset[p.id] || {}) }));
+
+  juuri.innerHTML = `
+    <div class="kartta kartta--kirjaus" data-kartta-el></div>
+
+    <p class="sijaintitila" data-sijaintitila aria-live="polite">Haetaan sijaintia…</p>
+
+    <div class="btn-row btn-row--kirjaus">
+      <button class="btn btn--ghost" type="button" data-oma-sijainti>Oma sijainti</button>
+      <button class="btn btn--ghost" type="button" data-lahin-piste>Lähin piste</button>
+    </div>
+
+    <form class="lomake" data-lomake novalidate>
+      <div class="lomake__rivi">
+        <label class="field">
+          <span>Mittauspiste</span>
+          <select name="piste" data-piste required></select>
+        </label>
+        <label class="field field--kapea">
+          <span>Näkösyvyys, m</span>
+          <input type="number" name="nakosyvyys" inputmode="decimal"
+                 min="0.1" max="30" step="0.1" required data-nakosyvyys>
+        </label>
+      </div>
+
+      <div class="lomake__rivi">
+        <label class="field field--kapea">
+          <span>Päivämäärä</span>
+          <input type="date" name="pvm" required data-pvm>
+        </label>
+        <label class="field field--kapea">
+          <span>Kellonaika</span>
+          <input type="time" name="klo" required data-klo>
+        </label>
+        <button class="btn btn--ghost btn--nyt" type="button" data-nyt>Nyt</button>
+      </div>
+
+      <div class="lomake__rivi">
+        <label class="field">
+          <span>Mittaaja</span>
+          <input type="text" name="mittaaja" autocomplete="name" data-mittaaja>
+        </label>
+      </div>
+
+      <label class="field">
+        <span>Huomiot</span>
+        <textarea name="huomiot" rows="2" data-huomiot
+                  placeholder="Esimerkiksi sää, tuuli, levähavainto"></textarea>
+      </label>
+
+      <label class="valinta">
+        <input type="checkbox" data-korjaa>
+        <span>Tallenna tämä sijainti pisteen uudeksi paikaksi.
+          Valitse tämä vain, jos olet varmasti oikealla mittauspaikalla –
+          kartan pisteet ovat toistaiseksi arvioita.</span>
+      </label>
+
+      <p class="lomake__virhe" data-virhe role="alert" hidden></p>
+
+      <button class="btn btn--primary btn--tallenna" type="submit">Tallenna kirjaus</button>
+    </form>
+
+    <section class="kirjaukset" aria-labelledby="kirjaukset-otsikko">
+      <h2 id="kirjaukset-otsikko">Tallennetut kirjaukset</h2>
+      <p class="note">Kirjaukset ovat vain tässä selaimessa. Vie ne tiedostoksi ja
+        toimita sihteerille – selaimen tietojen tyhjennys poistaa ne.</p>
+      <div data-lista></div>
+      <div class="btn-row">
+        <button class="btn btn--ghost" type="button" data-vie-json>Vie JSON</button>
+        <button class="btn btn--ghost" type="button" data-vie-csv>Vie CSV</button>
+        <button class="btn btn--ghost" type="button" data-tyhjenna>Tyhjennä kaikki</button>
+      </div>
+    </section>`;
+
+  const kartta = luoKartta(juuri.querySelector("[data-kartta-el]"), {
+    scrollWheelZoom: true,
+  });
+  // Ilman karttaa sijaintia ei voi tarkentaa eikä lomake toimisi oikein,
+  // joten näytetään yksi selkeä viesti puolitoimivan lomakkeen sijaan.
+  if (!kartta) {
+    juuri.innerHTML = `<p class="status">Karttakirjastoa ei saatu ladattua, joten
+      kirjausta ei voi tehdä nyt. Kokeile uudelleen verkon piirissä tai kirjaa mittaus
+      paperille ja toimita se sihteerille:
+      <a href="mailto:leo.lauramaa@gmail.com">leo.lauramaa@gmail.com</a>.</p>`;
+    return;
+  }
+
+  /* --- Kartan merkit ---------------------------------------------------- */
+
+  const pisteMerkit = new Map();
+  for (const p of pisteet) {
+    const m = L.marker([p.lat, p.lon], {
+      icon: pisteMerkki(p, null, p.tarkkuus === "arvio" ? "pin--arvio" : ""),
+      alt: pisteenNimi(p),
+    }).addTo(kartta);
+    m.on("click", () => valitsePiste(p.id, true));
+    pisteMerkit.set(p.id, m);
+  }
+
+  // Kirjauksen sijainti: raahattava merkki, joka on aina se paikka, joka
+  // tallennetaan. Oma GPS-sijainti on erikseen, koska ne eivät ole sama asia.
+  const kirjausMerkki = L.marker([pisteet[0].lat, pisteet[0].lon], {
+    draggable: true,
+    autoPan: true,
+    icon: L.divIcon({
+      className: "",
+      html: '<span class="pin pin--kirjaus" aria-hidden="true"></span>',
+      iconSize: [42, 42],
+      iconAnchor: [21, 21],
+    }),
+    alt: "Kirjauksen sijainti",
+  }).addTo(kartta);
+
+  // Aluksi näkyvissä on koko pisteistö; paikannus siirtää kartan käyttäjän luo.
+  kartta.fitBounds(pisteet.map((p) => [p.lat, p.lon]), { padding: [30, 30] });
+
+  let omaMerkki = null;
+  let omaYmpyra = null;
+
+  /* --- Tila ------------------------------------------------------------- */
+
+  const tila = {
+    lat: pisteet[0].lat,
+    lon: pisteet[0].lon,
+    lahde: "piste",
+    tarkkuus: null,
+    gps: null,
+  };
+
+  const sijaintitila = juuri.querySelector("[data-sijaintitila]");
+  const pisteValinta = juuri.querySelector("[data-piste]");
+  const virhe = juuri.querySelector("[data-virhe]");
+
+  pisteValinta.innerHTML =
+    pisteet
+      .map(
+        (p) =>
+          `<option value="${esc(p.id)}">${esc(pisteenNimi(p))}${
+            p.tarkkuus === "arvio" ? " (sijainti arvio)" : ""
+          }</option>`
+      )
+      .join("") + '<option value="">— muu paikka, ei listalla —</option>';
+
+  const LAHTEET = {
+    gps: "puhelimen paikannus",
+    kartta: "siirretty kartalla",
+    piste: "mittauspisteen sijainti",
+  };
+
+  function paivitaSijainti() {
+    kirjausMerkki.setLatLng([tila.lat, tila.lon]);
+    const tarkkuus =
+      tila.lahde === "gps" && tila.tarkkuus != null
+        ? ` · tarkkuus ±<span class="num">${Math.round(tila.tarkkuus)}</span> m`
+        : "";
+    sijaintitila.innerHTML =
+      `Kirjataan kohtaan <span class="num">${esc(koordinaatti(tila.lat, tila.lon))}</span>` +
+      ` <em>(${LAHTEET[tila.lahde]})</em>${tarkkuus}`;
+  }
+
+  function valitsePiste(id, siirraSijainti) {
+    pisteValinta.value = id;
+    const p = pisteet.find((x) => x.id === id);
+    if (p && siirraSijainti) {
+      tila.lat = p.lat;
+      tila.lon = p.lon;
+      tila.lahde = "piste";
+      paivitaSijainti();
+      kartta.panTo([p.lat, p.lon]);
+    }
+  }
+
+  kirjausMerkki.on("dragend", () => {
+    const { lat, lng } = kirjausMerkki.getLatLng();
+    tila.lat = lat;
+    tila.lon = lng;
+    tila.lahde = "kartta";
+    tila.tarkkuus = null;
+    paivitaSijainti();
+  });
+
+  pisteValinta.addEventListener("change", () => {
+    if (pisteValinta.value) valitsePiste(pisteValinta.value, true);
+  });
+
+  /* --- Paikannus -------------------------------------------------------- */
+
+  let ensimmainenPaikannus = true;
+
+  function paikannusVirhe(err) {
+    const syyt = {
+      1: "Paikannus on estetty. Salli sijainnin käyttö selaimen asetuksista.",
+      2: "Sijaintia ei saatu. Siirrä merkki kartalla oikeaan kohtaan.",
+      3: "Paikannus kesti liian kauan. Siirrä merkki kartalla oikeaan kohtaan.",
+    };
+    sijaintitila.textContent = syyt[err.code] || "Sijaintia ei saatu.";
+  }
+
+  function seuraaSijaintia() {
+    if (!("geolocation" in navigator)) {
+      sijaintitila.textContent =
+        "Selain ei tue paikannusta. Siirrä merkki kartalla oikeaan kohtaan.";
+      return;
+    }
+    navigator.geolocation.watchPosition(
+      (sijainti) => {
+        const { latitude, longitude, accuracy } = sijainti.coords;
+        tila.gps = { lat: latitude, lon: longitude, tarkkuus: accuracy };
+
+        if (!omaMerkki) {
+          omaMerkki = L.marker([latitude, longitude], {
+            icon: L.divIcon({
+              className: "",
+              html: '<span class="pin pin--oma" aria-hidden="true"></span>',
+              iconSize: [24, 24],
+              iconAnchor: [12, 12],
+            }),
+            alt: "Oma sijainti",
+            interactive: false,
+          }).addTo(kartta);
+          omaYmpyra = L.circle([latitude, longitude], {
+            radius: accuracy,
+            className: "oma-tarkkuus",
+            interactive: false,
+          }).addTo(kartta);
+        } else {
+          omaMerkki.setLatLng([latitude, longitude]);
+          omaYmpyra.setLatLng([latitude, longitude]).setRadius(accuracy);
+        }
+
+        // Ensimmäisellä paikannuksella siirrytään käyttäjän luo ja ehdotetaan
+        // lähintä pistettä. Sen jälkeen ei enää, jotta kartta ei nykisi eikä
+        // käsin tehty tarkennus katoa.
+        if (ensimmainenPaikannus) {
+          ensimmainenPaikannus = false;
+          kaytaOmaaSijaintia();
+          kartta.setView([latitude, longitude], 14);
+        }
+      },
+      paikannusVirhe,
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 10000 }
+    );
+  }
+
+  function kaytaOmaaSijaintia() {
+    if (!tila.gps) {
+      sijaintitila.textContent = "Sijaintia ei ole vielä saatu. Odota hetki.";
+      return;
+    }
+    tila.lat = tila.gps.lat;
+    tila.lon = tila.gps.lon;
+    tila.tarkkuus = tila.gps.tarkkuus;
+    tila.lahde = "gps";
+    paivitaSijainti();
+    kartta.panTo([tila.lat, tila.lon]);
+    ehdotaLahinta();
+  }
+
+  function ehdotaLahinta() {
+    const osuma = lahinPiste(pisteet, tila.lat, tila.lon);
+    if (!osuma) return;
+    pisteValinta.value = osuma.piste.id;
+    const km = osuma.etaisyys >= 1000;
+    sijaintitila.innerHTML +=
+      ` · lähin piste <b>${esc(osuma.piste.id)}</b>, ` +
+      `<span class="num">${km ? fiNum(osuma.etaisyys / 1000) : Math.round(osuma.etaisyys)}</span> ` +
+      (km ? "km" : "m");
+  }
+
+  juuri.querySelector("[data-oma-sijainti]").addEventListener("click", kaytaOmaaSijaintia);
+  juuri.querySelector("[data-lahin-piste]").addEventListener("click", () => {
+    const osuma = lahinPiste(pisteet, tila.lat, tila.lon);
+    if (osuma) valitsePiste(osuma.piste.id, true);
+  });
+
+  /* --- Lomake ----------------------------------------------------------- */
+
+  const lomake = juuri.querySelector("[data-lomake]");
+  const kentat = {
+    pvm: juuri.querySelector("[data-pvm]"),
+    klo: juuri.querySelector("[data-klo]"),
+    nakosyvyys: juuri.querySelector("[data-nakosyvyys]"),
+    mittaaja: juuri.querySelector("[data-mittaaja]"),
+    huomiot: juuri.querySelector("[data-huomiot]"),
+    korjaa: juuri.querySelector("[data-korjaa]"),
+  };
+
+  function asetaNyt() {
+    kentat.pvm.value = tanaan();
+    kentat.klo.value = kello();
+  }
+  asetaNyt();
+  juuri.querySelector("[data-nyt]").addEventListener("click", asetaNyt);
+  kentat.mittaaja.value = lue(AVAIN_MITTAAJA, "");
+
+  let kirjaukset = lue(AVAIN_KIRJAUKSET, []);
+
+  function naytaVirhe(teksti) {
+    virhe.textContent = teksti;
+    virhe.hidden = !teksti;
+  }
+
+  lomake.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const arvo = Number(String(kentat.nakosyvyys.value).replace(",", "."));
+    if (!kentat.nakosyvyys.value || !Number.isFinite(arvo) || arvo <= 0 || arvo > 30) {
+      naytaVirhe("Anna näkösyvyys metreinä, esimerkiksi 4,5.");
+      kentat.nakosyvyys.focus();
+      return;
+    }
+    if (!kentat.pvm.value || !kentat.klo.value) {
+      naytaVirhe("Täytä päivämäärä ja kellonaika.");
+      return;
+    }
+    naytaVirhe("");
+
+    const piste = pisteet.find((p) => p.id === pisteValinta.value);
+    const kirjaus = {
+      id: `${kentat.pvm.value}-${kentat.klo.value.replace(":", "")}-${
+        pisteValinta.value || "muu"
+      }-${Math.random().toString(36).slice(2, 7)}`,
+      pvm: kentat.pvm.value,
+      klo: kentat.klo.value,
+      piste: pisteValinta.value,
+      pisteen_nimi: piste ? piste.nimi : "",
+      nakosyvyys: Math.round(arvo * 10) / 10,
+      lat: Number(tila.lat.toFixed(5)),
+      lon: Number(tila.lon.toFixed(5)),
+      sijainnin_lahde: tila.lahde,
+      tarkkuus_m: tila.lahde === "gps" && tila.tarkkuus != null
+        ? Math.round(tila.tarkkuus)
+        : "",
+      mittaaja: kentat.mittaaja.value.trim(),
+      huomiot: kentat.huomiot.value.trim(),
+      tallennettu: new Date().toISOString(),
+    };
+
+    kirjaukset = [kirjaus, ...kirjaukset];
+    if (!kirjoita(AVAIN_KIRJAUKSET, kirjaukset)) {
+      naytaVirhe(
+        "Kirjausta ei saatu tallennettua selaimeen. Vie aiemmat kirjaukset " +
+          "tiedostoksi ja yritä uudelleen."
+      );
+      kirjaukset = kirjaukset.slice(1);
+      return;
+    }
+    kirjoita(AVAIN_MITTAAJA, kirjaus.mittaaja);
+
+    // Pisteen sijainnin korjaus on erillinen tieto: se muuttaa kartan pistettä
+    // pysyvästi tässä selaimessa ja tulee mukaan vientiin.
+    if (kentat.korjaa.checked && piste) {
+      korjaukset[piste.id] = {
+        lat: kirjaus.lat,
+        lon: kirjaus.lon,
+        tarkkuus: "mitattu",
+        korjattu: kirjaus.tallennettu,
+      };
+      kirjoita(AVAIN_KORJAUKSET, korjaukset);
+      Object.assign(piste, korjaukset[piste.id]);
+      pisteMerkit.get(piste.id).setLatLng([piste.lat, piste.lon]);
+      pisteMerkit.get(piste.id).setIcon(pisteMerkki(piste, null));
+      kentat.korjaa.checked = false;
+    }
+
+    kentat.nakosyvyys.value = "";
+    kentat.huomiot.value = "";
+    asetaNyt();
+    piirraLista();
+    kentat.nakosyvyys.focus();
+  });
+
+  /* --- Lista ja vienti -------------------------------------------------- */
+
+  const lista = juuri.querySelector("[data-lista]");
+
+  function piirraLista() {
+    if (!kirjaukset.length) {
+      lista.innerHTML = '<p class="status">Ei vielä kirjauksia.</p>';
+      return;
+    }
+    lista.innerHTML = `<ul class="kirjauslista">${kirjaukset
+      .map(
+        (k) => `<li class="kirjaus">
+          <span class="kirjaus__arvo num">${fiNum(k.nakosyvyys)} m</span>
+          <span class="kirjaus__paikka">
+            <b>${esc(k.piste || "muu paikka")}</b>
+            ${k.pisteen_nimi ? esc(k.pisteen_nimi) : esc(koordinaatti(k.lat, k.lon))}
+          </span>
+          <span class="kirjaus__aika num">${esc(fiDate(k.pvm))} ${esc(k.klo)}</span>
+          <button class="kirjaus__poista" type="button" data-poista="${esc(k.id)}"
+                  aria-label="Poista kirjaus ${esc(k.piste)} ${esc(fiDate(k.pvm))}">Poista</button>
+        </li>`
+      )
+      .join("")}</ul>`;
+
+    lista.querySelectorAll("[data-poista]").forEach((nappi) => {
+      nappi.addEventListener("click", () => {
+        kirjaukset = kirjaukset.filter((k) => k.id !== nappi.dataset.poista);
+        kirjoita(AVAIN_KIRJAUKSET, kirjaukset);
+        piirraLista();
+      });
+    });
+  }
+  piirraLista();
+
+  juuri.querySelector("[data-vie-json]").addEventListener("click", () => {
+    lataa(
+      `nakosyvyyskirjaukset-${tanaan()}.json`,
+      JSON.stringify({ viety: new Date().toISOString(), kirjaukset, pistekorjaukset: korjaukset }, null, 1),
+      "application/json"
+    );
+  });
+
+  juuri.querySelector("[data-vie-csv]").addEventListener("click", () => {
+    lataa(`nakosyvyyskirjaukset-${tanaan()}.csv`, csv(kirjaukset), "text/csv");
+  });
+
+  juuri.querySelector("[data-tyhjenna]").addEventListener("click", () => {
+    if (!kirjaukset.length) return;
+    // Vahvistus tekstinä samassa napissa: kaksi painallusta, ei dialogia.
+    const nappi = juuri.querySelector("[data-tyhjenna]");
+    if (nappi.dataset.varmistus !== "1") {
+      nappi.dataset.varmistus = "1";
+      nappi.textContent = "Varmista: poista kaikki";
+      setTimeout(() => {
+        nappi.dataset.varmistus = "0";
+        nappi.textContent = "Tyhjennä kaikki";
+      }, 5000);
+      return;
+    }
+    kirjaukset = [];
+    kirjoita(AVAIN_KIRJAUKSET, kirjaukset);
+    nappi.dataset.varmistus = "0";
+    nappi.textContent = "Tyhjennä kaikki";
+    piirraLista();
+  });
+
+  paivitaSijainti();
+  seuraaSijaintia();
+
+  // Karttalaatat ja sivun osat talteen, jotta sivu aukeaa myös katvealueella.
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("kirjaa-sw.js").catch((err) => {
+      console.error("Offline-välimuistia ei saatu käyttöön:", err);
+    });
+  }
+}
+
+/* --- Portti -------------------------------------------------------------- */
+
+function init() {
+  const portti = document.querySelector("[data-portti]");
+  const juuri = document.querySelector("[data-kirjaa]");
+  if (!portti || !juuri) return;
+
+  function avaa() {
+    portti.hidden = true;
+    juuri.hidden = false;
+    kaynnista(juuri);
+  }
+
+  if (sessionStorage.getItem(AVAIN_PORTTI) === TUNNUS_TIIVISTE) {
+    avaa();
+    return;
+  }
+
+  const kentta = portti.querySelector("[data-tunnus]");
+  const viesti = portti.querySelector("[data-portti-virhe]");
+  portti.querySelector("form").addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (tiiviste(kentta.value.trim()) !== TUNNUS_TIIVISTE) {
+      viesti.hidden = false;
+      kentta.value = "";
+      kentta.focus();
+      return;
+    }
+    // Istuntokohtainen: selaimen sulkeminen vaatii tunnuksen uudelleen.
+    sessionStorage.setItem(AVAIN_PORTTI, TUNNUS_TIIVISTE);
+    avaa();
+  });
+  kentta.focus();
+}
+
+init();

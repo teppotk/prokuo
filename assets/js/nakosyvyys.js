@@ -6,23 +6,7 @@
  * yhden sävyn luokiteltu sarja: tummempi = kirkkaampi vesi. Jokainen solu
  * näyttää myös mitatun lukeman, joten tieto ei ole pelkän värin varassa.
  */
-import { esc, loadJSON, fiNum } from "./site.js";
-
-/** Luokkarajat metreinä. Tunnus 1 = sameinta, 6 = kirkkainta. */
-const BINS = [
-  { bin: 1, min: 0, label: "alle 2" },
-  { bin: 2, min: 2, label: "2–3" },
-  { bin: 3, min: 3, label: "3–4" },
-  { bin: 4, min: 4, label: "4–5" },
-  { bin: 5, min: 5, label: "5–6" },
-  { bin: 6, min: 6, label: "6 tai yli" },
-];
-
-function binOf(value) {
-  let hit = BINS[0];
-  for (const b of BINS) if (value >= b.min) hit = b;
-  return hit.bin;
-}
+import { esc, loadJSON, fiNum, BINS, binOf } from "./site.js";
 
 function median(values) {
   const s = [...values].sort((a, b) => a - b);

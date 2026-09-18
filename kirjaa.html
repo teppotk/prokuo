@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mittausten kirjaus – Pro Kuolimo ry</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#edf1ee" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0d1412" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/archivo-var-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/plexmono-400-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/site.css">
+<link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css">
+<script src="assets/vendor/leaflet/leaflet.js" defer></script>
+<script type="module" src="assets/js/site.js"></script>
+<script type="module" src="assets/js/kirjaa.js"></script>
+</head>
+<body>
+<site-header></site-header>
+<noscript>
+  <nav class="wrap noscript-nav" aria-label="Päävalikko">
+    <a href="index.html">Etusivu</a> ·
+    <a href="nakosyvyys.html">Näkösyvyys</a> ·
+    <a href="kartta.html">Kartta</a> ·
+    <a href="yhdistys.html">Yhdistys</a>
+  </nav>
+</noscript>
+
+<main id="main">
+
+  <section class="pagehead pagehead--tiivis">
+    <div class="wrap">
+      <p class="label">Mittaajille</p>
+      <h1>Näkösyvyyden kirjaus</h1>
+      <p class="lead">Täytä mittaus paikan päällä. Kartta näyttää sijaintisi ja
+        mittauspisteet, ja kirjauksen voi tehdä myös jälkikäteen rannalta.</p>
+    </div>
+  </section>
+
+  <section class="band band--tight">
+    <div class="wrap wrap--kapea">
+
+      <div class="portti" data-portti>
+        <form class="portti__lomake">
+          <h2>Tunnusluku</h2>
+          <p>Sivu on tarkoitettu mittaajille. Tunnusluvun saa yhdistyksen sihteeriltä.</p>
+          <label class="field">
+            <span>Tunnusluku</span>
+            <input type="password" autocomplete="current-password"
+                   enterkeyhint="go" data-tunnus required>
+          </label>
+          <p class="lomake__virhe" data-portti-virhe role="alert" hidden>Tunnusluku ei täsmää.</p>
+          <button class="btn btn--primary" type="submit">Avaa kirjaus</button>
+          <p class="note">Tunnusluku pitää sivun pois satunnaisilta kävijöiltä. Se ei ole
+            tietoturvaa: sivusto on staattinen, joten kirjauksiin ei saa laittaa mitään
+            arkaluonteista. Yhteydenotot
+            <a href="mailto:leo.lauramaa@gmail.com">leo.lauramaa@gmail.com</a>.</p>
+        </form>
+      </div>
+
+      <div data-kirjaa hidden>
+        <p class="status" data-status>Ladataan mittauspisteitä…</p>
+      </div>
+
+      <noscript><p class="status">Kirjaus vaatii JavaScriptin. Ilman sitä mittaukset
+        kirjataan paperille ja toimitetaan sihteerille:
+        <a href="mailto:leo.lauramaa@gmail.com">leo.lauramaa@gmail.com</a>.</p></noscript>
+
+    </div>
+  </section>
+
+  <section class="band band--tint">
+    <div class="wrap wrap--kapea">
+      <div class="head">
+        <p class="label">Näin se toimii</p>
+        <h2>Kolme asiaa, jotka kannattaa tietää</h2>
+      </div>
+      <div class="prose">
+        <p><b>Kirjaukset jäävät tähän puhelimeen.</b> Tämä on prototyyppi eikä
+          tallenna mitään palvelimelle. Vie kirjaukset lopuksi tiedostoksi
+          (<i>Vie JSON</i> tai <i>Vie CSV</i>) ja lähetä ne sihteerille. Älä tyhjennä
+          selaimen tietoja ennen vientiä.</p>
+        <p><b>Kartta toimii myös katvealueella.</b> Kun sivu on kerran avattu verkossa,
+          se ja kertaalleen katsotut karttalehdet jäävät muistiin. Kannattaa siis avata
+          sivu ja selata mittausalue kartalla jo rannassa, ennen lähtöä.</p>
+        <p><b>Pisteiden sijainnit ovat arvioita.</b> Ne on johdettu mittausraportin
+          kartalta, joten ne voivat olla noin kilometrin sivussa. Kun olet varmasti
+          oikealla mittauspaikalla, rastita <i>Tallenna tämä sijainti pisteen uudeksi
+          paikaksi</i> – niin rekisteri tarkentuu mittaus mittaukselta.</p>
+      </div>
+      <p class="note" style="margin-top:1.75rem">Mittaustapa ja pisteen valinta on
+        kuvattu ohjeessa:
+        <a href="aineistot/2025-11-19-nakosyvyysmittausten-ohjeistus.pdf">Näkösyvyysmittausten
+        ohjeistus (PDF)</a>. Sinilevähavainnot kirjataan edelleen
+        <a href="aineistot/2024-07-24-sinilevaseurannan-tietolomake.pdf">omalla lomakkeellaan</a>.</p>
+    </div>
+  </section>
+
+</main>
+<site-footer></site-footer>
+</body>
+</html>

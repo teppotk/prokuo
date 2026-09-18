@@ -1,8 +1,12 @@
 # prokuolimo.fi
 
 Pro Kuolimo ry:n verkkosivusto: staattinen HTML, CSS ja JavaScript. Ei
-palvelinkoodia, ei tietokantaa, ei käännösvaihetta ja ei ulkoisia
-verkkopyyntöjä – kirjasimet, kuvat ja aineistot ovat sivuston mukana.
+palvelinkoodia, ei tietokantaa eikä käännösvaihetta – kirjasimet, kuvat ja
+aineistot ovat sivuston mukana.
+
+Ainoa poikkeus ulkoisiin verkkopyyntöihin ovat karttasivut `kartta.html` ja
+`kirjaa.html`, jotka hakevat karttalaatat OpenStreetMapista. Muut sivut
+toimivat edelleen kokonaan ilman verkkoa.
 
 ## Kehitys
 
@@ -56,6 +60,40 @@ python3 tools/extract-nakosyvyys.py aineistot/uusi-raportti.pdf > data/nakosyvyy
 Skripti tulostaa stderr-virtaan kaikki kohdat, joita se ei osannut lukea
 yksikäsitteisesti. Tarkista ne PDF:stä ennen julkaisua.
 
+## Kartta ja mittausten kirjaus
+
+`kartta.html` näyttää mittaustulokset kartalla aikajanan kanssa. `kirjaa.html`
+on mittaajien työkalu, jolla näkösyvyysmittauksen voi kirjata maastossa;
+se ei ole navigaatiossa eikä hakukoneissa (`noindex` + `robots.txt`).
+
+Kirjaussivun tunnusluku on **`kuolimo2026`**. Vaihto: avaa sivu, laske uusi
+tiiviste selaimen konsolissa komennolla `prokuolimoTiiviste("uusi tunnus")`
+ja korvaa `TUNNUS_TIIVISTE` tiedostossa `assets/js/kirjaa.js`. Tunnusluku ei
+ole tietoturvaa vaan este satunnaiselle kävijälle – sivusto on staattinen,
+joten palvelinpuolen tarkistusta ei ole.
+
+Kirjaukset tallentuvat toistaiseksi vain selaimen `localStorage`-muistiin ja
+viedään sieltä JSON- tai CSV-tiedostona. Tietokantatallennus on avoin asia.
+
+Leaflet on kopioitu repoon (`assets/vendor/leaflet/`, BSD-2) kirjasimien
+tapaan. Offline-käyttöä varten `kirjaa-sw.js` pitää sivun osat ja jo katsotut
+karttalaatat välimuistissa; kasvata sen `VERSIO`-vakiota, kun kirjaussivun
+tiedostoja muutetaan.
+
+## Mittauspisteiden sijainnit
+
+`data/mittauspisteet.json` on johdettu mittausraportin karttakalvoilta:
+
+```bash
+python3 tools/johda-pistesijainnit.py aineistot/uusi-raportti.pdf > data/mittauspisteet.json
+```
+
+Sijainnit ovat **arvioita** noin kilometrin tarkkuudella – raportissa ei ole
+koordinaatteja, vaan pisteiden paikka on luettu kartan sijaintimerkeistä ja
+kohdistettu koordinaatistoon pisteiden paikannimien avulla. Mittaajat
+tarkentavat sijainteja kirjaussivulla, joten älä yliaja korjattuja arvoja
+ajamalla työkalua uudelleen – tarkista aina diff.
+
 ## Sisällön päivitys ilman koodia
 
 | Mitä | Missä |
@@ -64,6 +102,7 @@ yksikäsitteisesti. Tarkista ne PDF:stä ennen julkaisua.
 | Aineistoluettelo | `data/aineistot.json` + tiedosto `aineistot/`-hakemistoon |
 | Linkkilista | `data/linkit.json` |
 | Näkösyvyystulokset | `data/nakosyvyys.json` |
+| Mittauspisteiden sijainnit | `data/mittauspisteet.json` |
 | Hallitus ja yhteystiedot | `yhdistys.html` sekä `YHTEYS`-objekti `assets/js/site.js`:ssä |
 | Navigaatio | `NAV`-taulukko `assets/js/site.js`:ssä |
 
