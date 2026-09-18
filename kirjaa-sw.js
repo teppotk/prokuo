@@ -19,7 +19,7 @@
  * Kun kirjaussivun tiedostoja muutetaan, kasvata silti VERSIO, jotta vanhat
  * välimuistit siivoutuvat. Vanhat poistetaan aktivoinnin yhteydessä.
  */
-const VERSIO = "kirjaa-v2";
+const VERSIO = "kirjaa-v3";
 const SIVU = `${VERSIO}-sivu`;
 const LAATAT = `${VERSIO}-laatat`;
 
@@ -76,6 +76,19 @@ self.addEventListener("activate", (e) => {
   );
 });
 
+/**
+ * Kertoo, saako vastauksen tallentaa. Tarkistus on tarpeen, koska OpenStreetMap
+ * vastaa estettyyn pyyntöön HTTP 200:lla ja "Access blocked" -kuvalla, ei
+ * virhekoodilla. Ilman tätä estolaatat jäisivät välimuistiin pysyvästi, vaikka
+ * eston syy korjattaisiin. Estovastaus kantaa otsakkeen Cache-Control: no-cache,
+ * ja Cache-Control on niitä harvoja otsakkeita, jotka näkyvät myös
+ * CORS-vastauksesta – x-blocked ei näkyisi.
+ */
+function saaTallentaa(vastaus) {
+  const ohje = vastaus.headers.get("cache-control") || "";
+  return !/\bno-store\b|\bno-cache\b/i.test(ohje);
+}
+
 /** Siivoaa laattavälimuistin vanhimmasta päästä, kun katto ylittyy. */
 async function rajoita(cache) {
   const avaimet = await cache.keys();
@@ -96,7 +109,7 @@ self.addEventListener("fetch", (e) => {
     e.respondWith(
       fetch(request)
         .then(async (vastaus) => {
-          if (vastaus.ok) {
+          if (vastaus.ok && saaTallentaa(vastaus)) {
             const cache = await caches.open(LAATAT);
             await cache.put(request, vastaus.clone());
             rajoita(cache);
@@ -114,7 +127,7 @@ self.addEventListener("fetch", (e) => {
     e.respondWith(
       fetch(request)
         .then(async (vastaus) => {
-          if (vastaus.ok) {
+          if (vastaus.ok && saaTallentaa(vastaus)) {
             const cache = await caches.open(SIVU);
             await cache.put(ilmanKyselya, vastaus.clone());
           }

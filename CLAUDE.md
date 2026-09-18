@@ -97,6 +97,12 @@ volunteer uses in the boat. `assets/js/kartta-apu.js` holds what they share
 - Logged measurements live in `localStorage` only and are exported as JSON or
   CSV (semicolon-separated, decimal comma, BOM — Finnish Excel). Database
   storage is an open decision, not a finished one; keep the export path working.
+- `kirjaa.html` must send a `Referer` to the tile server. Its
+  `<meta name="referrer">` is `origin`, never `no-referrer`: OpenStreetMap's
+  volunteer servers block traffic they cannot attribute to an app and answer
+  with an "Access blocked" PNG under **HTTP 200**, so it fails as a broken-looking
+  map rather than an error. `origin` sends only `https://…github.io/`, so the
+  logging page's own path still does not leak.
 - `kirjaa-sw.js` is a service worker that caches the logging page's own files
   and already-viewed map tiles, because the lake has poor coverage. It passes
   everything else straight through, so it must not affect the other pages, and
