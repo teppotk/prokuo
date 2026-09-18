@@ -19,7 +19,7 @@
  * Kun kirjaussivun tiedostoja muutetaan, kasvata silti VERSIO, jotta vanhat
  * välimuistit siivoutuvat. Vanhat poistetaan aktivoinnin yhteydessä.
  */
-const VERSIO = "kirjaa-v1";
+const VERSIO = "kirjaa-v2";
 const SIVU = `${VERSIO}-sivu`;
 const LAATAT = `${VERSIO}-laatat`;
 
@@ -32,6 +32,7 @@ const RUNKO = [
   "assets/js/site.js",
   "assets/js/kirjaa.js",
   "assets/js/kartta-apu.js",
+  "assets/js/luokat.js",
   "assets/vendor/leaflet/leaflet.js",
   "assets/vendor/leaflet/leaflet.css",
   "assets/fonts/archivo-var-latin.woff2",

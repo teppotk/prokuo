@@ -10,7 +10,8 @@
  * jotta värit tulevat site.css:n --b1…--b6-sarjasta. Näin tumma tila toimii
  * automaattisesti ja lukema näkyy värin päällä – tieto ei ole värin varassa.
  */
-import { esc, fiNum, binOf } from "./site.js";
+import { esc, fiNum } from "./site.js";
+import { binOf } from "./luokat.js";
 
 /** Kuolimon ja sen valuma-alueen rajaus: kartta ei lähde harhailemaan. */
 export const KUOLIMO = { lat: 61.3, lon: 27.7 };

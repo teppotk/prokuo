@@ -6,7 +6,8 @@
  * yhden sävyn luokiteltu sarja: tummempi = kirkkaampi vesi. Jokainen solu
  * näyttää myös mitatun lukeman, joten tieto ei ole pelkän värin varassa.
  */
-import { esc, loadJSON, fiNum, BINS, binOf } from "./site.js";
+import { esc, loadJSON, fiNum } from "./site.js";
+import { BINS, binOf } from "./luokat.js";
 
 function median(values) {
   const s = [...values].sort((a, b) => a - b);

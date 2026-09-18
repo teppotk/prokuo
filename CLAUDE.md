@@ -83,6 +83,14 @@ volunteer uses in the boat. `assets/js/kartta-apu.js` holds what they share
   colours come from the same `--b1`…`--b6` ramp as the register table and dark
   mode needs no extra logic. The measured number is always printed on the
   marker — the same "never colour alone" rule as the table.
+- The class bins live in `assets/js/luokat.js`, **not in `site.js`**, and that is
+  load-bearing. GitHub Pages serves everything with `max-age=600`, so for ten
+  minutes after a deploy a browser can pair a freshly fetched new module with a
+  stale cached `site.js`. A new module importing a newly added `site.js` export
+  then dies on `SyntaxError: does not provide an export named …`, which no
+  `try`/`catch` on the page can see — it took down both map pages at once once
+  already. **Never add an export to `site.js` for a new module to import; put
+  shared new code in a new file**, which cannot be stale.
 - The passphrase on `kirjaa.html` is **not security**; it is a doorbell. It is an
   FNV-1a hash in `TUNNUS_TIIVISTE` (currently `kuolimo2026`), changed by running
   `prokuolimoTiiviste("…")` in the console. Nothing sensitive may be logged there.

@@ -10,7 +10,8 @@
  * Aikajana liikkuu mittauskierroksittain. Puuttuva mittaus piirretään
  * tyhjänä renkaana, ei nollana.
  */
-import { esc, loadJSON, fiNum, BINS, binOf } from "./site.js";
+import { esc, loadJSON, fiNum } from "./site.js";
+import { BINS, binOf } from "./luokat.js";
 import { luoKartta, pisteMerkki, pisteenNimi, koordinaatti } from "./kartta-apu.js";
 
 const VAIHTOVALI_MS = 1400;
