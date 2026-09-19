@@ -622,7 +622,10 @@ p {
   background: currentcolor;
 }
 
-@media (max-width: 64rem) {
+/* Vaakavalikko vaihtuu hampurilaiseksi 74 rem:ssä, joka on sama mitta kuin
+   .wrap: sitä kapeammalla seitsemän kohtaa ja liity-painike eivät mahdu
+   yhdelle riville, vaan yläpalkki kasvaisi kaksiriviseksi joka sivulla. */
+@media (max-width: 74rem) {
   .nav-toggle {
     display: inline-flex;
   }

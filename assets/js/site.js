@@ -14,6 +14,7 @@ export const NAV = [
   { href: "aineistot.html", text: "Aineistot" },
   { href: "uutiset.html", text: "Uutiset" },
   { href: "yhdistys.html", text: "Yhdistys" },
+  { href: "kirjaa.html", text: "Kirjaus" },
 ];
 
 const CTA = { href: "liity.html", text: "Liity jäseneksi" };

@@ -63,8 +63,10 @@ yksikäsitteisesti. Tarkista ne PDF:stä ennen julkaisua.
 ## Kartta ja mittausten kirjaus
 
 `kartta.html` näyttää mittaustulokset kartalla aikajanan kanssa. `kirjaa.html`
-on mittaajien työkalu, jolla näkösyvyysmittauksen voi kirjata maastossa;
-se ei ole navigaatiossa eikä hakukoneissa (`noindex` + `robots.txt`).
+on mittaajien työkalu, jolla näkösyvyysmittauksen voi kirjata maastossa. Se on
+testausvaiheen ajan päävalikossa, jotta testaajat löytävät sen. `noindex` ja
+`robots.txt`-esto ovat yhä paikallaan, mutta ne pitävät loitolla vain
+hakukoneet – sivu on käytännössä julkinen.
 
 **Tunnuslukua ei toistaiseksi kysytä:** portti aukeaa millä tahansa
 syötteellä, myös tyhjällä. Käyttöönotto on `TUNNUS_KAYTOSSA = true`

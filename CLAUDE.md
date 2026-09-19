@@ -39,10 +39,13 @@ footer, and no data-driven content.
 `aineistot`, `uutiset`, `yhdistys`, `liity`). Prose and factual content live
 directly in the HTML so they work without JS and are indexable.
 
-**Two further pages sit outside the `NAV` array on purpose.** `kartta.html` is
-public but reached from `nakosyvyys.html`, not from the menu — eight nav items
-is the design. `kirjaa.html` is the field-logging tool: unlinked, `noindex`,
-`Disallow` in `robots.txt`, and behind a passphrase. Both are in
+**Two further pages.** `kartta.html` is public but reached from
+`nakosyvyys.html`, not from the menu. `kirjaa.html` is the field-logging tool
+and *is* in `NAV` — put there so testers can find it while the prototype is
+being tried out. It keeps `noindex` and the `robots.txt` `Disallow`, which stop
+search engines but not people, and the passphrase is currently switched off, so
+treat the page as public. When the testing round ends, the honest options are to
+take it out of `NAV` again or to switch the passphrase back on. Both pages are in
 `check-links.py`'s scope like any other page; `kartta.html` is in `sitemap.xml`
 and `kirjaa.html` deliberately is not.
 
@@ -91,6 +94,13 @@ volunteer uses in the boat. `assets/js/kartta-apu.js` holds what they share
   `try`/`catch` on the page can see — it took down both map pages at once once
   already. **Never add an export to `site.js` for a new module to import; put
   shared new code in a new file**, which cannot be stale.
+- The point `<select>` opens on a placeholder, not on a real point. A browser
+  selects the first `<option>` by default, and a silently preselected point
+  collects other points' measurements. For the same reason nothing auto-selects
+  a point from a GPS fix either: the nearest point is only *shown* in the status
+  line, and choosing it is an explicit press of "Lähin piste". Saving is blocked
+  until a location has actually been set (`tila.lahde === "aloitus"`), so the
+  centroid the marker starts from can never reach the data.
 - The passphrase on `kirjaa.html` is **currently switched off**:
   `TUNNUS_KAYTOSSA = false`, so the gate opens on any submit including an empty
   one. Turning it back on means that constant *and* restoring the input's

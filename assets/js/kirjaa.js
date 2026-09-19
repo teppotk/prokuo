@@ -289,10 +289,18 @@ async function kaynnista(juuri) {
 
   /* --- Tila ------------------------------------------------------------- */
 
+  // Merkki tarvitsee jonkin aloituspaikan, mutta se ei ole kirjattava sijainti
+  // ennen kuin mittaaja asettaa sen. Lähde "aloitus" erottaa nämä toisistaan,
+  // jottei pisteistön keskipiste päädy aineistoon mittauskoordinaattina.
+  const keskus = {
+    lat: pisteet.reduce((a, p) => a + p.lat, 0) / pisteet.length,
+    lon: pisteet.reduce((a, p) => a + p.lon, 0) / pisteet.length,
+  };
+
   const tila = {
-    lat: pisteet[0].lat,
-    lon: pisteet[0].lon,
-    lahde: "piste",
+    lat: keskus.lat,
+    lon: keskus.lon,
+    lahde: "aloitus",
     tarkkuus: null,
     gps: null,
   };
@@ -302,7 +310,10 @@ async function kaynnista(juuri) {
   const virhe = juuri.querySelector("[data-virhe]");
   const kuittaus = juuri.querySelector("[data-kuittaus]");
 
+  // Ensimmäisenä tyhjä paikanpitäjä, ei mittauspiste. Selain valitsisi muuten
+  // listan ensimmäisen pisteen, ja se keräisi vahingossa muiden mittauksia.
   pisteValinta.innerHTML =
+    '<option value="">— valitse mittauspiste —</option>' +
     pisteet
       .map(
         (p) =>
@@ -310,7 +321,7 @@ async function kaynnista(juuri) {
             p.tarkkuus === "arvio" ? " (sijainti arvio)" : ""
           }</option>`
       )
-      .join("") + '<option value="">— muu paikka, ei listalla —</option>';
+      .join("");
 
   /** Matka luettavassa muodossa: alle kilometri metreinä, sen yli kilometreinä. */
   function matka(metria) {
@@ -330,6 +341,7 @@ async function kaynnista(juuri) {
         : "Puhelimen paikannus";
     }
     if (tila.lahde === "kartta") return "Asetettu kartalla";
+    if (tila.lahde === "aloitus") return "Sijaintia ei ole asetettu";
     const valittu = pisteet.find((p) => p.id === pisteValinta.value);
     if (!valittu) return "Mittauspistettä ei ole valittu";
     return valittu.tarkkuus === "arvio"
@@ -344,6 +356,14 @@ async function kaynnista(juuri) {
 
   function paivitaSijainti() {
     kirjausMerkki.setLatLng([tila.lat, tila.lon]);
+
+    if (tila.lahde === "aloitus") {
+      naytaViesti(
+        "Sijaintia ei ole vielä asetettu. Odota paikannusta, valitse " +
+          "mittauspiste tai siirrä merkkiä kartalla."
+      );
+      return;
+    }
 
     // Lähin piste kertoo vain silloin jotain, kun sijainti ei ole pisteestä
     // itsestään – muuten se näyttäisi aina nollan metrin päässä olevan pisteen.
@@ -486,20 +506,19 @@ async function kaynnista(juuri) {
     tila.lahde = "gps";
     paivitaSijainti();
     kartta.panTo([tila.lat, tila.lon]);
-    ehdotaLahinta();
-  }
-
-  /** Valitsee lähimmän pisteen listasta, mutta ei siirrä kirjattavaa sijaintia. */
-  function ehdotaLahinta() {
-    const osuma = lahinPiste(pisteet, tila.lat, tila.lon);
-    if (!osuma) return;
-    pisteValinta.value = osuma.piste.id;
-    irronnutPiste = "";
-    paivitaSijainti();
   }
 
   juuri.querySelector("[data-oma-sijainti]").addEventListener("click", kaytaOmaaSijaintia);
   juuri.querySelector("[data-lahin-piste]").addEventListener("click", () => {
+    // Ennen kuin sijainti on tiedossa, "lähin" laskettaisiin pisteistön
+    // keskipisteestä eli mielivaltaisesta paikasta.
+    if (tila.lahde === "aloitus") {
+      naytaViesti(
+        "Lähintä pistettä ei voi etsiä ennen kuin sijainti on tiedossa. " +
+          "Odota paikannusta tai siirrä merkkiä kartalla."
+      );
+      return;
+    }
     const osuma = lahinPiste(pisteet, tila.lat, tila.lon);
     if (osuma) valitsePiste(osuma.piste.id, true);
   });
@@ -562,6 +581,13 @@ async function kaynnista(juuri) {
     }
     if (!kentat.pvm.value || !kentat.klo.value) {
       naytaVirhe("Täytä päivämäärä ja kellonaika.");
+      return;
+    }
+    if (tila.lahde === "aloitus") {
+      naytaVirhe(
+        "Aseta vielä kirjauksen sijainti: odota paikannusta, valitse " +
+          "mittauspiste tai siirrä merkkiä kartalla."
+      );
       return;
     }
     naytaVirhe("");
