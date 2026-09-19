@@ -33,6 +33,28 @@ touching any page, JSON file, or the `NAV` array; it exits non-zero on failure.
 completely: ES modules and `fetch()` both fail, which means no header, no
 footer, and no data-driven content.
 
+## Publishing
+
+**Standing instruction from the repo owner: always push finished work to GitHub
+without asking.** `origin` is `teppotk/prokuo` and GitHub Pages builds from
+`main` at the repo root, so a push to `main` is a live deploy to
+<https://teppotk.github.io/prokuo/>. The working rhythm is therefore: make the
+change, run `check-links.py`, commit in Finnish, `git push origin main`, wait
+for the Pages build, and check the result on the live URL — not only locally.
+
+```bash
+gh api repos/teppotk/prokuo/pages/builds/latest --jq '.status + " " + .commit'
+```
+
+Two things this standing permission does not cover, because they are not
+"updates": deleting published material, and anything that would put credentials
+or personal data into a public repo. Ask first for those.
+
+Verifying live matters more here than in most projects. Pages serves everything
+with `max-age=600`, the field page installs a service worker, and the map calls
+a third-party tile service — three ways for a deploy to behave differently from
+`localhost`, each of which has already bitten this site once.
+
 ## Architecture
 
 **Eight pages at the repo root** (`index`, `kuolimo`, `toiminta`, `nakosyvyys`,
