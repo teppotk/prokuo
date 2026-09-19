@@ -178,6 +178,15 @@ Consequences to respect:
 - Missing cells are real (some points are not measured on some rounds, and the
   March round is measured from the ice with far fewer points). Render them as
   gaps, never as zeros.
+- The per-point trend section on `nakosyvyys.html` is **small multiples, one
+  series each** — thirty lines in one plot would be unreadable and there is no
+  palette that separates thirty series. The y scale is shared (0–7 m) so points
+  are comparable, which flattens the curves; the charts are therefore taller
+  than wide-format sparklines would be. The change figure is the **same-month
+  year-over-year** difference (June 2024 vs June 2025 and so on, at most three
+  pairs), because consecutive rounds differ by season and cannot be subtracted.
+  Direction is not colour-coded: the sign carries it, and `--nieria` stays
+  reserved. Two years is not a trend, and the section says so.
 - Round summary bars encode two things on purpose: segment proportions show the
   class distribution, and total bar width shows sample size relative to the
   largest round. Do not normalise the widths to 100 %.

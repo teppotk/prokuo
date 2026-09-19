@@ -1589,6 +1589,154 @@ p {
 }
 
 /* ==========================================================================
+   Muutos ajan yli pisteittäin (nakosyvyys.html, assets/js/nakosyvyys.js)
+   Pieniä kuvaajia rinnakkain, yksi sarja kussakin. Merkit ovat ohuita ja
+   apuviivat yhtä sävyä pohjasta, jotta 30 kuvaajaa ei huuda yhtä aikaa.
+   ========================================================================== */
+.trendisumma {
+  list-style: none;
+  margin: 0 0 2.25rem;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(9rem, 100%), 1fr));
+  gap: 1rem 1.5rem;
+  border-top: 1px solid var(--rule);
+  padding-top: 1.25rem;
+}
+
+.trendisumma li {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.trendisumma b {
+  font-family: var(--mono);
+  font-size: 1.75rem;
+  font-weight: 500;
+  line-height: 1.1;
+  color: var(--water);
+}
+
+.trendisumma span {
+  font-size: var(--fs-micro);
+  color: var(--ink-2);
+}
+
+.trendiryhma + .trendiryhma {
+  margin-top: 2.25rem;
+}
+
+.trendiryhma h3 {
+  font-family: var(--sans);
+  font-size: var(--fs-label);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.trendiruudukko {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  /* min() antaa kortin kutistua, kun lukija on suurentanut fonttikokoa. */
+  grid-template-columns: repeat(auto-fill, minmax(min(11.5rem, 100%), 1fr));
+  gap: 1.25rem 1rem;
+}
+
+.trendi {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Kahden rivin vähimmäiskorkeus pitää rivin kuvaajat samalla linjalla, vaikka
+   yksi mittauspaikan nimi katkeaisi kahdelle riville. Ilman sitä kuvaajia ei
+   voi verrata silmämääräisesti rivin poikki. */
+.trendi__nimi {
+  font-size: var(--fs-micro);
+  color: var(--ink-2);
+  line-height: 1.3;
+  min-height: 2.6em;
+}
+
+.trendi__nimi b {
+  font-family: var(--mono);
+  font-weight: 500;
+  overflow-wrap: normal;
+  color: var(--ink);
+}
+
+.trendi__kuva {
+  width: 100%;
+  height: auto;
+  margin-top: 0.35rem;
+}
+
+/* Apuviivat 2, 4 ja 6 metrin kohdalla: yhtenäinen hiusviiva, ei katkoviiva. */
+.trendi__apu {
+  stroke: var(--rule);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Maaliskuun jääkierros merkitään, koska sitä ei voi verrata kesäkierroksiin. */
+.trendi__jaa {
+  fill: var(--rule);
+  opacity: 0.3;
+}
+
+.trendi__viiva {
+  fill: none;
+  stroke: var(--water);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.trendi__piste {
+  fill: var(--water);
+  /* Reunus on sama kuin osion pohja, jotta vierekkäiset pallot erottuvat. */
+  stroke: var(--paper);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.trendi__luvut {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.15rem 0.6rem;
+  margin-top: 0.3rem;
+  font-size: var(--fs-micro);
+}
+
+.trendi__luvut > .num {
+  font-size: var(--fs-small);
+  color: var(--ink);
+}
+
+.trendi__muutos {
+  font-family: var(--mono);
+  overflow-wrap: normal;
+  color: var(--ink-2);
+}
+
+.trendi__muutos--tyhja {
+  font-family: var(--sans);
+}
+
+.trendi__pareja {
+  font-size: var(--fs-label);
+  color: var(--ink-2);
+}
+
+/* ==========================================================================
    Kartta, aikajana ja mittausten kirjaus
    (kartta.html, kirjaa.html – ks. assets/js/kartta-apu.js)
    ========================================================================== */
