@@ -29,13 +29,16 @@ const YHTEYS = {
 };
 
 /**
- * Yhdistyksen logo. Purettu mittausohjeen PDF:stä tools/pura-logo.py:llä ja
- * käännetty vaaleaksi tummalle pohjalle. Sama kuva sekä ylä- että
- * alatunnisteessa, eri kokoisena. Linkillä on oma aria-label, joten kuva on
- * ruudunlukijalle koristeellinen (alt="") eikä nimeä toisteta kahdesti.
+ * Yhdistyksen virallinen logo. Lähde on media-source/ProKuolimologo_*.png ja
+ * julkaistavat versiot syntyvät build-images.sh:lla, joka rajaa läpinäkyvän
+ * reunuksen pois. Valkoinen versio on näytölle, tumma tulostukseen.
+ *
+ * Sama kuva sekä ylä- että alatunnisteessa, eri kokoisena. Linkillä on oma
+ * aria-label, joten kuva on ruudunlukijalle koristeellinen (alt="") eikä
+ * nimeä toisteta kahdesti.
  */
-const LOGO = `<img class="brand__logo" src="assets/img/pro-kuolimo-logo.png"
-  width="754" height="212" alt="">`;
+const LOGO = `<img class="brand__logo" src="assets/img/pro-kuolimo-logo-valkoinen.png"
+  width="675" height="174" alt="">`;
 
 /** Nykyinen tiedostonimi, esim. "kuolimo.html". Juuri vastaa index.html:ää. */
 function currentPage() {
@@ -127,12 +130,12 @@ class SiteFooter extends HTMLElement {
   <div class="wrap">
     <div class="footer__grid">
       <div>
-        <img class="footer__logo" src="assets/img/pro-kuolimo-logo.png"
-             width="754" height="212"
+        <img class="footer__logo" src="assets/img/pro-kuolimo-logo-valkoinen.png"
+             width="675" height="174"
              alt="Pro Kuolimo ry – puhtaan veden puolesta">
         <img class="footer__logo footer__logo--paperi"
-             src="assets/img/pro-kuolimo-logo-paperi.png"
-             width="754" height="212" alt="" aria-hidden="true">
+             src="assets/img/pro-kuolimo-logo-tumma.png"
+             width="675" height="174" alt="" aria-hidden="true">
         <p>Edistämme vesiensuojelua, luonnonsuojelua ja maisemanhoitoa
         Kuolimolla ja sen valuma-alueella Etelä-Karjalassa ja Etelä-Savossa.</p>
       </div>

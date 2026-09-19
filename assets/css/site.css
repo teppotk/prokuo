@@ -489,10 +489,10 @@ p {
   min-width: 0;
 }
 
-/* Logo yläpalkissa. Korkeus rem-mittana, jotta se kasvaa lukijan
-   fonttikoon mukana kuten muukin sivu. Iskulause "puhtaan veden puolesta" on
-   23 % logon korkeudesta, eli tällä koolla noin 10 pikseliä: pieni mutta
-   luettava. Pienempänä se olisi pelkkä harmaa viiva. */
+/* Logo yläpalkissa. Korkeus rem-mittana, jotta se kasvaa lukijan fonttikoon
+   mukana kuten muukin sivu. Iskulause "puhtaan veden puolesta" on noin
+   viidennes logon korkeudesta, eli tällä koolla kymmenisen pikseliä: pieni
+   mutta luettava. Pienempänä se olisi pelkkä harmaa viiva. */
 .brand__logo {
   width: auto;
   height: 2.75rem;
@@ -1437,10 +1437,8 @@ p {
   gap: 0.45rem;
 }
 
-/* Yhdistyksen oikea logo. Se on purettu mittausohjeen PDF:stä
-   (tools/pura-logo.py) ja käännetty vaaleaksi tummalle pohjalle: sama piirros,
-   ei uudelleen piirretty. Yläpalkissa on tiiviimpi tunnus + tekstilogo, koska
-   tämä koko logo iskulauseineen ei mahdu sinne luettavan kokoisena. */
+/* Yhdistyksen virallinen logo alatunnisteessa. Sama kuva kuin yläpalkissa,
+   isompana: tässä on tilaa näyttää iskulause kunnolla. */
 .footer__logo {
   width: 100%;
   max-width: 19rem;

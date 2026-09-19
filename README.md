@@ -103,15 +103,16 @@ ajamalla työkalua uudelleen – tarkista aina diff.
 
 ## Yhdistyksen logo
 
-Logoa ei ole erillisenä tiedostona missään: se on upotettuna mittausohjeen
-PDF:n ylätunnisteeseen. Alatunnisteen logo puretaan sieltä:
+Viralliset logotiedostot ovat `media-source/ProKuolimologo_valkoinen.png` ja
+`ProKuolimologo_tumma.png`. Julkaistavat versiot syntyvät kuvaputkesta:
 
 ```bash
-python3 tools/pura-logo.py      # -> assets/img/pro-kuolimo-logo.png
+./tools/build-images.sh    # -> assets/img/pro-kuolimo-logo-{valkoinen,tumma}.png
 ```
 
-Työkalu purkaa valkoisen pohjan läpinäkyvyydeksi ja kääntää tekstin vaaleaksi
-tummalle sivustolle. Aaltojen sininen on yhdistyksen tunnusväri eikä muutu.
+Skripti rajaa vain läpinäkyvän reunuksen pois; väreihin tai muotoon ei kosketa.
+Reunus veisi yläpalkissa turhaa korkeutta, sillä lähes puolet tiedoston
+korkeudesta on tyhjää. Valkoinen versio on näytölle, tumma tulostukseen.
 
 ## Sisällön päivitys ilman koodia
 

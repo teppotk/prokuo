@@ -41,6 +41,18 @@ render opastetaulu         "DSC_0416.jpg"
 render saimaannieria       "Nieriä-kutuasussa.jpg"            "549x315+0+0"
 render kalastusrajoitukset "Kalastusrajoitusalue-kartta.jpg"
 
+# Yhdistyksen logo. Virallisissa tiedostoissa on läpinäkyvä reunus, joka veisi
+# yläpalkissa turhaa korkeutta – lähes puolet tiedoston korkeudesta on tyhjää.
+# Reunus rajataan pois; muuta ei tehdä, väreihin ei kosketa. Valkoinen versio
+# on näytölle (sivusto on tumma), tumma versio tulostukseen.
+logo() {
+  local name="$1" file="$2"
+  magick "$SRC/$file" -trim +repage -strip "$OUT/$name.png"
+  printf '  %s  (%s)\n' "$OUT/$name.png" "$(magick identify -format '%wx%h' "$OUT/$name.png")"
+}
+logo pro-kuolimo-logo-valkoinen ProKuolimologo_valkoinen.png
+logo pro-kuolimo-logo-tumma     ProKuolimologo_tumma.png
+
 # Avauskuva sosiaaliseen mediaan (1200x630).
 magick "$SRC/Lahtelan-kosteikko1.jpg" -auto-orient -resize 1200x630^ \
   -gravity center -extent 1200x630 -strip -quality 82 "$OUT/og-kuva.jpg"
