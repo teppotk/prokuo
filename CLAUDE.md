@@ -94,6 +94,12 @@ volunteer uses in the boat. `assets/js/kartta-apu.js` holds what they share
   `try`/`catch` on the page can see — it took down both map pages at once once
   already. **Never add an export to `site.js` for a new module to import; put
   shared new code in a new file**, which cannot be stale.
+- A saved row in the list is clickable: it puts that entry's own coordinate and
+  point back into the map and the form, so a volunteer can see where an earlier
+  measurement went and add a new reading to the same point. The whole row is a
+  hit target via an `::after` overlay on a real `<button>`, because a `<button>`
+  may only contain phrasing content and the row's `<dl>` of fields may not live
+  inside one.
 - The point `<select>` opens on a placeholder, not on a real point. A browser
   selects the first `<option>` by default, and a silently preselected point
   collects other points' measurements. For the same reason nothing auto-selects

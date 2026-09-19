@@ -341,6 +341,7 @@ async function kaynnista(juuri) {
         : "Puhelimen paikannus";
     }
     if (tila.lahde === "kartta") return "Asetettu kartalla";
+    if (tila.lahde === "aiempi") return "Aiemmasta kirjauksesta";
     if (tila.lahde === "aloitus") return "Sijaintia ei ole asetettu";
     const valittu = pisteet.find((p) => p.id === pisteValinta.value);
     if (!valittu) return "Mittauspistettä ei ole valittu";
@@ -658,6 +659,7 @@ async function kaynnista(juuri) {
     gps: "puhelimen paikannus",
     kartta: "asetettu kartalla",
     piste: "pistelistasta",
+    aiempi: "aiemmasta kirjauksesta",
   };
 
   /**
@@ -679,18 +681,57 @@ async function kaynnista(juuri) {
     if (k.mittaaja) rivit.push(["Mittaaja", esc(k.mittaaja)]);
     if (k.huomiot) rivit.push(["Huomiot", esc(k.huomiot)]);
 
-    return `<li class="kirjaus${uusin ? " kirjaus--uusin" : ""}">
+    // "Näytä kartalla" -painike kattaa koko rivin ::after-peitteellä, joten
+    // riviä voi napauttaa mistä kohtaa tahansa. Painike on silti oikea
+    // <button>, joten näppäimistö ja ruudunlukija toimivat – ja rivin
+    // kuvauslista jää sen ulkopuolelle, koska <button> saa sisältää vain
+    // tekstitason elementtejä.
+    const kuvaus = `${k.piste || "muu paikka"}, ${fiNum(k.nakosyvyys)} m, ${fiDate(k.pvm)}`;
+    return `<li class="kirjaus${uusin ? " kirjaus--uusin" : ""}" data-rivi="${esc(k.id)}">
       <div class="kirjaus__paa">
         <span class="kirjaus__arvo num">${fiNum(k.nakosyvyys)} m</span>
         <span class="kirjaus__aika num">${esc(fiDate(k.pvm))} klo ${esc(k.klo)}</span>
+        <button class="kirjaus__valitse" type="button" data-valitse="${esc(k.id)}">
+          Näytä kartalla<span class="visually-hidden"> ja valitse lomakkeeseen: ${esc(kuvaus)}</span>
+        </button>
         <button class="kirjaus__poista" type="button" data-poista="${esc(k.id)}"
-                aria-label="Poista kirjaus ${esc(k.piste)} ${esc(fiDate(k.pvm))}">Poista</button>
+                aria-label="Poista kirjaus ${esc(kuvaus)}">Poista</button>
       </div>
       <dl class="kirjaus__tiedot">${rivit
         .map(([nimi, arvo]) => `<div><dt>${nimi}</dt><dd>${arvo}</dd></div>`)
         .join("")}</dl>
     </li>`;
   }
+
+  /**
+   * Avaa aiemman kirjauksen: siirtää kartan sen kohdalle ja asettaa lomakkeen
+   * samaan pisteeseen. Näin mittaaja näkee, mihin edellinen mittaus meni, ja
+   * voi kirjata samaan pisteeseen uuden lukeman ilman etsimistä.
+   *
+   * Sijainniksi tulee kirjauksen oma koordinaatti eikä pisteen listasijainti:
+   * se on se paikka, jossa edellinen mittaus oikeasti tehtiin.
+   */
+  function avaaKirjaus(k) {
+    tila.lat = k.lat;
+    tila.lon = k.lon;
+    tila.lahde = "aiempi";
+    tila.tarkkuus = null;
+    pisteValinta.value = pisteet.some((p) => p.id === k.piste) ? k.piste : "";
+    irronnutPiste = "";
+    paivitaSijainti();
+    kartta.setView([k.lat, k.lon], Math.max(kartta.getZoom(), 13));
+    valittuKirjaus = k.id;
+    merkitseValittuRivi();
+  }
+
+  /** Korostaa listasta sen rivin, joka on nyt kartalla ja lomakkeessa. */
+  function merkitseValittuRivi() {
+    lista.querySelectorAll("[data-rivi]").forEach((rivi) => {
+      rivi.classList.toggle("kirjaus--valittu", rivi.dataset.rivi === valittuKirjaus);
+    });
+  }
+
+  let valittuKirjaus = "";
 
   function piirraLista(korostaId) {
     maara.textContent = kirjaukset.length ? `(${kirjaukset.length})` : "";
@@ -702,10 +743,20 @@ async function kaynnista(juuri) {
       .map((k) => kirjausRivi(k, k.id === korostaId))
       .join("")}</ul>`;
 
+    merkitseValittuRivi();
+
+    lista.querySelectorAll("[data-valitse]").forEach((nappi) => {
+      nappi.addEventListener("click", () => {
+        const k = kirjaukset.find((x) => x.id === nappi.dataset.valitse);
+        if (k) avaaKirjaus(k);
+      });
+    });
+
     lista.querySelectorAll("[data-poista]").forEach((nappi) => {
       nappi.addEventListener("click", () => {
         kirjaukset = kirjaukset.filter((k) => k.id !== nappi.dataset.poista);
         kirjoita(AVAIN_KIRJAUKSET, kirjaukset);
+        if (valittuKirjaus === nappi.dataset.poista) valittuKirjaus = "";
         piirraLista();
       });
     });

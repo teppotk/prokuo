@@ -2130,8 +2130,55 @@ p {
 }
 
 .kirjaus {
+  position: relative;
   padding: 0.85rem 0;
   border-bottom: 1px solid var(--rule);
+}
+
+/* Koko rivi on napautettava: painikkeen ::after-peite kattaa rivin, mutta
+   painike itse pysyy oikeana <button>-elementtinä näppäimistöä ja
+   ruudunlukijaa varten. Poista-painike nostetaan peitteen yläpuolelle. */
+.kirjaus__valitse {
+  flex: none;
+  font-family: var(--sans);
+  font-size: var(--fs-micro);
+  color: var(--water);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  padding: 0.35rem 0.6rem;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.kirjaus__valitse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.kirjaus:hover {
+  background: var(--paper-2);
+}
+
+.kirjaus:hover .kirjaus__valitse {
+  border-color: var(--rule-strong);
+}
+
+.kirjaus__valitse:focus-visible {
+  border-color: var(--nieria-bright);
+}
+
+/* Rivi, joka on nyt kartalla ja lomakkeessa. */
+.kirjaus--valittu {
+  background: var(--paper-2);
+  box-shadow: inset 3px 0 0 var(--water);
+  padding-left: 0.75rem;
+}
+
+.kirjaus__poista {
+  position: relative;
+  z-index: 1;
 }
 
 /* Juuri tallennettu rivi merkitään, jotta sen löytää listasta heti. */
@@ -2155,7 +2202,7 @@ p {
 }
 
 .kirjaus__aika {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-width: 0;
   font-size: var(--fs-micro);
   color: var(--ink-2);
