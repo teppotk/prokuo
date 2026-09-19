@@ -2431,14 +2431,125 @@ p {
   }
 }
 
+/* ==========================================================================
+   Tulostus
+   Sivusto on näytöllä vain tumma. Paperilla se ei toimi: tumma pohja syö
+   väriainetta ja vaalea teksti katoaa. Tulostukselle annetaan siksi oma
+   paletti samoihin tokeneihin, jolloin koko sivusto kääntyy kerralla eikä
+   jokaista komponenttia tarvitse käsitellä erikseen.
+   ========================================================================== */
 @media print {
+  :root {
+    color-scheme: light;
+
+    --paper: #fff;
+    --paper-2: #fff;
+    --paper-3: #fff;
+    --ink: #111;
+    --ink-2: #444;
+    --rule: #ccc;
+    --rule-strong: #999;
+
+    --water: #12525c;
+    --water-hi: #fff;
+    --water-tint: #fff;
+    --moss: #4a6a25;
+    --nieria: #a8471f;
+    --nieria-bright: #a8471f;
+    --humus: #6b4a2c;
+
+    /* Sävysarja kulkee samaan suuntaan kuin näytöllä – vaaleampi tarkoittaa
+       kirkkaampaa vettä – mutta paperille käännettynä, jottei kirkkain askel
+       katoa valkoiseen. Tekstivärit tarkistettu: jokainen askel ylittää
+       4,5:1 omalla parillaan. */
+    --b1: #12525c;
+    --b2: #2c7480;
+    --b3: #5c9ba3;
+    --b4: #91bcc0;
+    --b5: #bcd5d7;
+    --b6: #dfe9e9;
+    --b-on-light: #0f1a19;
+    --b-on-dark: #fff;
+    --b1-fg: var(--b-on-dark);
+    --b2-fg: var(--b-on-dark);
+    --b3-fg: var(--b-on-light);
+    --b4-fg: var(--b-on-light);
+    --b5-fg: var(--b-on-light);
+    --b6-fg: var(--b-on-light);
+
+    --shadow: none;
+  }
+
+  /* Vain ruudulla toimivat osat pois: navigaatio, painikerivit, aikajanan
+     säätimet ja kirjauslomake, joka on työkalu eikä luettavaa. */
+  .skip,
   .topbar,
   .hero__media,
-  .btn-row {
+  .btn-row,
+  .aikajana,
+  .portti,
+  .lomake,
+  .kirjaus__poista,
+  .kirjaus__valitse,
+  .filters {
     display: none;
   }
+
   body {
     background: #fff;
-    color: #000;
+    color: var(--ink);
+  }
+
+  /* Tummiksi suunnitellut osiot vaaleiksi. Näissä on kovakoodattuja vaaleita
+     värejä tummaa pohjaa varten, joten ne nollataan kerralla – paperilla ne
+     olisivat näkymättömiä. */
+  .pagehead,
+  .pagehead *,
+  .hero,
+  .hero *,
+  .band--deep,
+  .band--deep *,
+  .footer,
+  .footer * {
+    background-color: transparent !important;
+    color: var(--ink) !important;
+    border-color: var(--rule) !important;
+    text-shadow: none !important;
+  }
+
+  .hero::after {
+    display: none;
+  }
+
+  /* Näytön logo on käännetty vaaleaksi eikä näkyisi paperilla lainkaan. */
+  .footer__logo {
+    display: none;
+  }
+
+  .footer__logo--paperi {
+    display: block;
+  }
+
+  /* Kartta on näytön väline: laatat haetaan verkosta, eikä karttaa edes
+     rakenneta ennen kuin osio vieritetään näkyviin – tulosteeseen jäisi siis
+     usein pelkkä "kartta avautuu kun vierität" -teksti. Samat luvut ovat
+     rekisteritaulukossa. #kartta piilottaa koko osion näkösyvyyssivulla,
+     [data-kartta] pelkän kartan omalla karttasivulla. */
+  #kartta,
+  [data-kartta] {
+    display: none;
+  }
+
+  /* Sivunvaihdot: otsikko ei jää sivun pohjalle eikä taulukon rivi katkea. */
+  h2,
+  h3 {
+    break-after: avoid;
+  }
+
+  .trendi,
+  .record tr,
+  .doc,
+  .news {
+    break-inside: avoid;
   }
 }

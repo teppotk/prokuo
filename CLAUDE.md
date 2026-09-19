@@ -241,6 +241,23 @@ too; do not drop it. Each page carries a single `theme-color` meta.
 Re-introducing a light theme means re-introducing that contradiction, so if it
 ever comes back, the ramp has to keep one meaning in both.
 
+**Paper is the one exception, and it is a full second palette.** `@media print`
+redefines the same tokens — white paper, dark ink, no shadows — so the whole site
+turns over at once instead of component by component. Two things in there are not
+obvious. The class ramp is *reversed* for paper but keeps the screen's meaning:
+lighter still means clearer water, so the ramp runs dark (murky) to pale (clear),
+which is the only way the clearest step stays off the paper white; every step's
+`-fg` pair was re-checked past 4.5:1. And the sections designed to be dark —
+`.pagehead`, `.hero`, `.band--deep`, `.footer` — carry hardcoded light colours for
+their dark backgrounds, so print resets them and their descendants with
+`!important`; without that they print as invisible text on white. The footer logo
+has a second file with the original dark text (`…-paperi.png`) for the same
+reason. Maps are hidden on paper: the tiles come from the network and the map is
+not even built until the section scrolls into view, so the print would usually
+catch the placeholder. **Verify print changes by actually printing** —
+`chrome --headless --print-to-pdf` and look at the pages; nothing about this is
+visible on screen.
+
 - Type roles: Fraunces (voice, headings), Archivo (information, body and UI),
   IBM Plex Mono (measurement — numbers, dates, identifiers, captions).
   Self-hosted in `assets/fonts/` as latin + latin-ext subsets.

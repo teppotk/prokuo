@@ -31,6 +31,9 @@ Sivusto on vain tumma, joten tekstin väri käännetään vaaleaksi (--ink).
 Aaltojen sininen on yhdistyksen tunnusväri, eikä sitä muuteta. Lopputulos on
 sama piirros käännettynä tummalle pohjalle, ei uudelleen piirretty logo.
 
+Paperille tehdään toinen versio alkuperäisellä tummalla tekstillä: tulostus
+käyttää vaaleaa pohjaa, jolla vaalea teksti katoaisi kokonaan.
+
 Kuva suurennetaan kaksinkertaiseksi ja peittokanava kiristetään, jotta reunat
 pysyvät terävinä myös tarkoilla näytöillä. Alkuperäinen 377 pikseliä riittäisi
 vain noin 190 pikselin leveydelle.
@@ -48,6 +51,7 @@ from PIL import Image
 
 LAHDE_PDF = "aineistot/2025-11-19-nakosyvyysmittausten-ohjeistus.pdf"
 KOHDE = "assets/img/pro-kuolimo-logo.png"
+KOHDE_PAPERI = "assets/img/pro-kuolimo-logo-paperi.png"
 
 TEKSTI = (34, 34, 34)
 AALTO = (46, 145, 201)
@@ -89,42 +93,36 @@ def main():
 
     leveys, korkeus = kuva.size
     lahde = kuva.load()
-    ulos = Image.new("RGBA", kuva.size, (0, 0, 0, 0))
-    kohde = ulos.load()
 
-    aaltoja = tekstia = 0
-    for y in range(korkeus):
-        for x in range(leveys):
-            r, g, b = lahde[x, y]
-            if b - r > 12:
-                a = peitto(r, AALTO[0])
-                if a > 0:
-                    aaltoja += 1
-                kohde[x, y] = AALTO + (round(a * 255),)
-            else:
-                a = peitto(r, TEKSTI[0])
-                if a > 0:
-                    tekstia += 1
-                kohde[x, y] = TEKSTI_VAALEA + (round(a * 255),)
+    def rakenna(tekstin_vari):
+        ulos = Image.new("RGBA", kuva.size, (0, 0, 0, 0))
+        kohde = ulos.load()
+        for y in range(korkeus):
+            for x in range(leveys):
+                r, g, b = lahde[x, y]
+                if b - r > 12:
+                    kohde[x, y] = AALTO + (round(peitto(r, AALTO[0]) * 255),)
+                else:
+                    kohde[x, y] = tekstin_vari + (round(peitto(r, TEKSTI[0]) * 255),)
 
-    print(f"aaltopikseleitä {aaltoja}, tekstipikseleitä {tekstia}", file=sys.stderr)
+        iso = ulos.resize((leveys * SUURENNUS, korkeus * SUURENNUS), Image.LANCZOS)
+        # Suurennus pehmentää reunat. Peittokanava kiristetään takaisin, jotta
+        # kirjainten reunat ovat teräviä eivätkä sumeita.
+        r, g, b, a = iso.split()
+        a = a.point(lambda v: 0 if v < 40 else (255 if v > 215 else round((v - 40) * 255 / 175)))
+        return Image.merge("RGBA", (r, g, b, a))
 
-    iso = ulos.resize(
-        (leveys * SUURENNUS, korkeus * SUURENNUS), Image.LANCZOS
-    )
-
-    # Suurennus pehmentää reunat. Peittokanava kiristetään takaisin, jotta
-    # kirjainten reunat ovat teräviä eivätkä sumeita.
-    r, g, b, a = iso.split()
-    a = a.point(lambda v: 0 if v < 40 else (255 if v > 215 else round((v - 40) * 255 / 175)))
-    iso = Image.merge("RGBA", (r, g, b, a))
-
-    png = os.path.join(tmp, "valmis.png")
-    iso.save(png)
     os.makedirs(os.path.dirname(KOHDE), exist_ok=True)
-    subprocess.run(["magick", png, "-strip", f"PNG8:{KOHDE}"], check=True)
-    print(f"{KOHDE}: {iso.size[0]} x {iso.size[1]} px, "
-          f"{os.path.getsize(KOHDE) / 1024:.1f} kt", file=sys.stderr)
+    for polku, vari, nimi in (
+        (KOHDE, TEKSTI_VAALEA, "näytölle"),
+        (KOHDE_PAPERI, TEKSTI, "paperille"),
+    ):
+        iso = rakenna(vari)
+        png = os.path.join(tmp, os.path.basename(polku))
+        iso.save(png)
+        subprocess.run(["magick", png, "-strip", f"PNG8:{polku}"], check=True)
+        print(f"{polku} ({nimi}): {iso.size[0]} x {iso.size[1]} px, "
+              f"{os.path.getsize(polku) / 1024:.1f} kt", file=sys.stderr)
 
 
 if __name__ == "__main__":

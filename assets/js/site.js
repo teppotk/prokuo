@@ -130,6 +130,9 @@ class SiteFooter extends HTMLElement {
         <img class="footer__logo" src="assets/img/pro-kuolimo-logo.png"
              width="754" height="212"
              alt="Pro Kuolimo ry – puhtaan veden puolesta">
+        <img class="footer__logo footer__logo--paperi"
+             src="assets/img/pro-kuolimo-logo-paperi.png"
+             width="754" height="212" alt="" aria-hidden="true">
         <p>Edistämme vesiensuojelua, luonnonsuojelua ja maisemanhoitoa
         Kuolimolla ja sen valuma-alueella Etelä-Karjalassa ja Etelä-Savossa.</p>
       </div>
