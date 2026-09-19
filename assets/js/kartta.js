@@ -57,10 +57,7 @@ function aikasarja(data, piste) {
   </div>`;
 }
 
-async function init() {
-  const hook = document.querySelector("[data-kartta]");
-  if (!hook) return;
-
+async function piirra(hook) {
   const status = hook.querySelector("[data-status]");
   const [pisteaineisto, data] = await Promise.all([
     loadJSON("data/mittauspisteet.json", status),
@@ -162,6 +159,48 @@ async function init() {
   hook.querySelector("[data-seuraava]").addEventListener("click", pysayta);
 
   nayta(data.kierrokset.length - 1);
+}
+
+/**
+ * Kartta rakennetaan vasta kun osio on tulossa näkyviin.
+ *
+ * Karttalaatat ovat sivuston ainoat ulkoiset verkkopyynnöt. Näkösyvyyssivun
+ * varsinainen sisältö – rekisteritaulukko ja pistekohtaiset kuvaajat – toimii
+ * kokonaan ilman verkkoa, ja niin sen kuuluu toimia jatkossakin: sivu latautuu
+ * pyytämättä mitään ulkopuolelta, ja vasta kun lukija vierittää kartan
+ * kohdalle, laattoja haetaan. Omalla karttasivullaan osio on heti näkyvissä,
+ * joten siellä tämä ei viivytä mitään.
+ *
+ * Tarkistus tehdään tavallisella vierityskuuntelijalla eikä
+ * IntersectionObserverilla: yhdelle elementille se on yhtä tarkka, ja jos
+ * ilmaisin ei jostain syystä laukeaisi, kartta jäisi rakentumatta kokonaan.
+ * Tässä sama tarkistus ajetaan latauksessa, vierityksessä ja koon muutoksessa.
+ */
+const ENNAKKO_PX = 300;
+
+function init() {
+  const hook = document.querySelector("[data-kartta]");
+  if (!hook) return;
+
+  let rakennettu = false;
+
+  function tarkista() {
+    if (rakennettu) return;
+    const ylapuoli = hook.getBoundingClientRect().top;
+    if (ylapuoli > window.innerHeight + ENNAKKO_PX) return;
+    rakennettu = true;
+    window.removeEventListener("scroll", tarkista);
+    window.removeEventListener("resize", tarkista);
+    window.removeEventListener("load", tarkista);
+    piirra(hook);
+  }
+
+  window.addEventListener("scroll", tarkista, { passive: true });
+  window.addEventListener("resize", tarkista, { passive: true });
+  // Sivun muu sisältö piirtyy vasta JSON-latausten jälkeen ja siirtää osiota,
+  // joten tarkistus ajetaan vielä kertaalleen kun kaikki on paikallaan.
+  window.addEventListener("load", tarkista);
+  tarkista();
 }
 
 init();

@@ -18,8 +18,11 @@
 <link rel="preload" href="assets/fonts/archivo-var-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/fonts/plexmono-400-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/css/site.css">
+<link rel="stylesheet" href="assets/vendor/leaflet/leaflet.css">
+<script src="assets/vendor/leaflet/leaflet.js" defer></script>
 <script type="module" src="assets/js/site.js"></script>
 <script type="module" src="assets/js/nakosyvyys.js"></script>
+<script type="module" src="assets/js/kartta.js"></script>
 </head>
 <body>
 <site-header></site-header>
@@ -62,11 +65,34 @@
           <a href="aineistot/2025-11-19-pro-kuolimo-nakosyvyysmittaustulokset.pdf">Lataa tulokset PDF-muodossa.</a></p></noscript>
       </div>
       <p class="note" style="margin-top:2rem">Sama aineisto on myös
-        <a href="kartta.html">kartalla aikajanan kanssa</a>. Taulukko on koottu Pro Kuolimon
+        <a href="#kartta">kartalla aikajanan kanssa</a>. Taulukko on koottu Pro Kuolimon
         julkaisemasta mittausraportista, joka on aineiston virallinen lähde. Raportissa on
         myös kartta, jolta näkyy jokaisen mittauspisteen sijainti.
         <a href="aineistot/2025-11-19-pro-kuolimo-nakosyvyysmittaustulokset.pdf">Avaa
         mittausraportti (PDF, 19.11.2025)</a>.</p>
+    </div>
+  </section>
+
+  <section class="band band--tight" id="kartta">
+    <div class="wrap">
+      <div class="head">
+        <p class="label">Mittaukset kartalla</p>
+        <h2>Missä vesi on kirkasta ja missä tummaa</h2>
+        <p class="lead">Sama aineisto paikkaan sidottuna. Aikajana kulkee
+          mittauskierroksittain, ja merkkiä napauttamalla avautuu pisteen koko aikasarja.</p>
+      </div>
+      <div data-kartta>
+        <p class="status" data-status>Kartta avautuu, kun vierität tähän kohtaan…</p>
+        <noscript><p class="status">Kartan selaaminen vaatii JavaScriptin. Taulukko yllä
+          sisältää samat luvut, ja
+          <a href="aineistot/2025-11-19-pro-kuolimo-nakosyvyysmittaustulokset.pdf">mittausraportissa (PDF)</a>
+          on kartta jokaisesta kierroksesta.</p></noscript>
+      </div>
+      <p class="note" style="margin-top:2rem">Kartta on ainoa kohta tällä sivulla, joka
+        hakee jotain sivuston ulkopuolelta: taustakartan laatat tulevat
+        OpenStreetMapista. Ne haetaan vasta kun vierität tänne, joten muu sivu toimii
+        ilman verkkoyhteyttä. Kartan saa myös
+        <a href="kartta.html">omaksi sivukseen</a>, jos haluat jakaa pelkän kartan.</p>
     </div>
   </section>
 
@@ -153,7 +179,7 @@
         linkitä alkuperäiseen raporttiin.</p>
       <div class="btn-row" style="margin-top:1.75rem">
         <a class="btn btn--ghost" href="aineistot/2025-11-19-pro-kuolimo-nakosyvyysmittaustulokset.pdf">Mittausraportti (PDF)</a>
-        <a class="btn btn--ghost" href="kartta.html">Mittaukset kartalla</a>
+        <a class="btn btn--ghost" href="kartta.html">Kartta omana sivuna</a>
         <a class="btn btn--ghost" href="data/nakosyvyys.json">Sama aineisto JSON-muodossa</a>
         <a class="btn btn--primary" href="liity.html">Liity jäseneksi</a>
       </div>

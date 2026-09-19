@@ -10,10 +10,14 @@ framework, no server code** — fonts, images and data all ship with the site.
 Content is in Finnish; keep it that way, including code comments and commit
 messages.
 
-**No external network requests at runtime, with one scoped exception:** the two
-map pages (`kartta.html`, `kirjaa.html`) fetch OpenStreetMap tiles. Leaflet
-itself is vendored in `assets/vendor/leaflet/`, like the fonts. Do not let this
-exception spread: the other eight pages must keep working with no network.
+**No external network requests at runtime, with one scoped exception:** the map
+pages fetch OpenStreetMap tiles. Leaflet itself is vendored in
+`assets/vendor/leaflet/`, like the fonts. `kartta.html` and `kirjaa.html` build
+their map on load; `nakosyvyys.html` embeds the same map but **builds it only
+once the section scrolls near the viewport**, so that page still loads asking
+nothing from outside — its register table and per-point charts must keep working
+with no network. The remaining seven pages request nothing external at all, and
+that is worth keeping.
 
 ## Commands
 
