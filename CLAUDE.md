@@ -76,6 +76,16 @@ take it out of `NAV` again or to switch the passphrase back on. Both pages are i
 `check-links.py`'s scope like any other page; `kartta.html` is in `sitemap.xml`
 and `kirjaa.html` deliberately is not.
 
+The mobile menu closes four ways: the toggle, a tap outside the header, Esc, and
+a click on one of its own links. All four live in `site.js`. Two details are
+load-bearing: the outside-tap listener is on `pointerdown` at document level with
+the whole `<site-header>` as the boundary, so the toggle's own handler still gets
+its tap instead of the menu closing a moment before it; and Esc listens on the
+document, not on the nav, because right after opening the menu focus sits on the
+toggle, which is outside the nav — the old nav-scoped listener never fired there.
+Only the Esc path returns focus to the toggle; doing that after a tap would leave
+a focus ring nobody asked for.
+
 **Shared chrome comes from custom elements**, not from duplicated markup:
 `<site-header>` and `<site-footer>` are defined in `assets/js/site.js` and
 render into the light DOM (not shadow DOM) so `site.css` applies. The `NAV`

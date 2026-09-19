@@ -73,18 +73,45 @@ class SiteHeader extends HTMLElement {
 
     const toggle = this.querySelector(".nav-toggle");
     const nav = this.querySelector(".nav");
-    toggle.addEventListener("click", () => {
-      const open = toggle.getAttribute("aria-expanded") === "true";
-      toggle.setAttribute("aria-expanded", String(!open));
-      nav.dataset.open = String(!open);
+
+    const auki = () => toggle.getAttribute("aria-expanded") === "true";
+
+    const aseta = (tila) => {
+      toggle.setAttribute("aria-expanded", String(tila));
+      nav.dataset.open = String(tila);
+    };
+
+    const sulje = (palautaKohdistus) => {
+      if (!auki()) return;
+      aseta(false);
+      // Kohdistus palautetaan vain näppäimistöltä suljettaessa. Hiiren tai
+      // sormen jäljiltä nappiin hyppäävä kohdistusrengas olisi hämmentävä.
+      if (palautaKohdistus) toggle.focus();
+    };
+
+    toggle.addEventListener("click", () => aseta(!auki()));
+
+    // Napautus valikon ulkopuolelle sulkee sen. Kuuntelija on pointerdownissa
+    // eikä clickissä, jotta valikko sulkeutuu heti kosketuksesta eikä vasta
+    // sormen noustessa. Rajana on koko yläpalkkielementti, joten avausnapin
+    // oma käsittelijä saa hoitaa napin napautuksen ilman että tämä ehtii
+    // sulkea valikon juuri ennen sitä.
+    document.addEventListener("pointerdown", (e) => {
+      if (!this.contains(e.target)) sulje(false);
     });
-    // Esc sulkee mobiilivalikon ja palauttaa kohdistuksen painikkeeseen.
-    nav.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        toggle.setAttribute("aria-expanded", "false");
-        nav.dataset.open = "false";
-        toggle.focus();
-      }
+
+    // Esc sulkee mistä tahansa. Aiemmin kuuntelija oli valikossa, joten Esc ei
+    // toiminut heti avaamisen jälkeen: kohdistus on silloin avausnapissa,
+    // joka on valikon ulkopuolella.
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") sulje(true);
+    });
+
+    // Valikon linkki sulkee valikon. Sivunvaihto hoitaisi sen itsestään, mutta
+    // saman sivun ankkurilinkki (esim. #kartta) ei lataa sivua uudelleen, ja
+    // valikko jäisi auki kohteen päälle.
+    nav.addEventListener("click", (e) => {
+      if (e.target.closest("a")) sulje(false);
     });
   }
 }
