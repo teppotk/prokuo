@@ -1667,10 +1667,14 @@ p {
   }
 }
 
+/* justify-content: start on välttämätön: grid venyttää auto-sarakkeet täyteen
+   leveyteen, jolloin kapealla näytöllä nimiöt karkasivat toistasataa pikseliä
+   asteikkonauhan oikealle puolelle eikä niitä lukenut enää nauhan päihin. */
 .pintaselite__asteikko {
   display: grid;
   grid-template-columns: auto auto;
   grid-template-rows: auto auto;
+  justify-content: start;
   gap: 0 0.6rem;
   align-items: start;
 }
