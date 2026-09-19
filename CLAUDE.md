@@ -193,6 +193,15 @@ Consequences to respect:
 - Missing cells are real (some points are not measured on some rounds, and the
   March round is measured from the ice with far fewer points). Render them as
   gaps, never as zeros.
+- The trend charts' y axis runs **downwards**: 0 m, the water surface, is the top
+  edge and depth increases toward the bottom, so clearing water pushes the curve
+  *down*. Upwards read as backwards — a rising line looked like improvement while
+  the axis measured depth. The surface is drawn as a rule heavier than the
+  gridlines, and a `--humus` gradient hazes the top of the plot and fades out
+  with depth. That gradient is an axis hint anchored to the scale, not data: it
+  is deliberately faint (0.22), because at half opacity it read as a filled area
+  chart and buried the line. `--humus` is its own token precisely so it is never
+  confused with the `--b` ramp, which means measured class on the map and table.
 - The per-point trend section on `nakosyvyys.html` is **small multiples, one
   series each** — thirty lines in one plot would be unreadable and there is no
   palette that separates thirty series. The y scale is shared (0–7 m) so points

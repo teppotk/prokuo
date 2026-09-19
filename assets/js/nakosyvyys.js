@@ -125,10 +125,14 @@ function recordTable(data) {
  */
 // Korkeampi kuvaaja kuin leveys antaisi olettaa: yhteinen 0–7 metrin asteikko
 // litistää muutokset, joten pystysuuntaa tarvitaan, jotta 0,5 metrin ero
-// näkyy lainkaan. Asteikkoa itseään ei kiristetä, koska nolla on
-// näkösyvyydessä todellinen pohja (vedenpinta) ja pisteitä pitää voida
-// verrata keskenään.
-const TRENDI = { w: 168, h: 96, padX: 4, padY: 9, yMax: 7 };
+// näkyy lainkaan. Asteikkoa ei kiristetä, koska nolla on todellinen lähtökohta
+// (vedenpinta) ja pisteitä pitää voida verrata keskenään.
+//
+// Pystyakseli kasvaa ALASPÄIN: 0 m eli vedenpinta on yläreunassa ja syvyys
+// lisääntyy alaspäin, kuten vesipatsaassa. Kun näkösyvyys kasvaa – vesi
+// kirkastuu – käyrä laskee. Päinvastainen suunta luki väärin: nouseva käyrä
+// näytti paranemiselta, vaikka akselilla oli syvyys.
+const TRENDI = { w: 168, h: 96, padX: 4, padY: 8, yMax: 7 };
 
 /** Apuviivat metreinä. Jokaiseen metriin piirretty viivasto olisi liian tiheä. */
 const TRENDI_VIIVAT = [2, 4, 6];
@@ -172,7 +176,7 @@ function kierrosSijainnit(data) {
 function sparkline(data, piste, osuudet, maaliskuut) {
   const { w, h, padX, padY, yMax } = TRENDI;
   const x = (i) => padX + osuudet[i] * (w - 2 * padX);
-  const y = (v) => padY + (1 - v / yMax) * (h - 2 * padY);
+  const y = (v) => padY + (v / yMax) * (h - 2 * padY);
 
   const havainnot = data.kierrokset.map((r, i) => {
     const v = data.havainnot[r.id][piste];
@@ -195,6 +199,17 @@ function sparkline(data, piste, osuudet, maaliskuut) {
     (m) => `<line class="trendi__apu" x1="${padX}" y1="${y(m).toFixed(1)}"
              x2="${w - padX}" y2="${y(m).toFixed(1)}"/>`
   ).join("");
+
+  // Humuksen sävy pinnalla, kirkastuen alaspäin: mitä alempana käyrä kulkee,
+  // sitä syvemmälle valo kantaa. Liuku on yhteinen kaikille kuvaajille ja
+  // määritelty kertaalleen osion alussa (liukuMaaritys).
+  const vesi = `<rect class="trendi__vesi" x="${padX}" y="${y(0).toFixed(1)}"
+    width="${w - 2 * padX}" height="${(y(yMax) - y(0)).toFixed(1)}"
+    fill="url(#trendi-humus)"/>`;
+
+  // Vedenpinta on kuvaajan yläreuna, ja se piirretään apuviivoja vahvempana.
+  const pinta = `<line class="trendi__pinta" x1="${padX}" y1="${y(0).toFixed(1)}"
+    x2="${w - padX}" y2="${y(0).toFixed(1)}"/>`;
 
   // Jääkierroksen kohta merkitään kaikissa kuvaajissa samalla tavalla.
   const jaa = maaliskuut
@@ -233,8 +248,53 @@ function sparkline(data, piste, osuudet, maaliskuut) {
 
   return `<svg class="trendi__kuva" viewBox="0 0 ${w} ${h}" role="img"
     aria-label="Piste ${esc(piste)}: ${esc(luettu)}">
-    ${jaa}${viivat}${polut}${pallot}
+    ${vesi}${jaa}${viivat}${pinta}${polut}${pallot}
   </svg>`;
+}
+
+/**
+ * Liuvun määritys ja pystyasteikon selite. Liuku määritellään kertaalleen ja
+ * kaikki 30 kuvaajaa viittaavat siihen, joten värimääritys on yhdessä paikassa.
+ * Asteikon selite on erillinen pieni kuva, koska tekstiä ei voi latoa itse
+ * kuvaajiin: skaalautuvassa SVG:ssä se menisi alle sivuston 14 pikselin
+ * vähimmäiskoon.
+ */
+function pintaselite() {
+  const { yMax } = TRENDI;
+  const h = 96;
+  const w = 26;
+  const padY = 8;
+  const y = (v) => padY + (v / yMax) * (h - 2 * padY);
+  const viivat = TRENDI_VIIVAT.map(
+    (m) => `<line class="trendi__apu" x1="0" y1="${y(m).toFixed(1)}" x2="${w}" y2="${y(m).toFixed(1)}"/>`
+  ).join("");
+
+  return `
+  <svg class="trendi__liuku" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="trendi-humus" x1="0" y1="0" x2="0" y2="1">
+        <stop class="trendi__liuku-pinta" offset="0"/>
+        <stop class="trendi__liuku-pohja" offset="0.6"/>
+      </linearGradient>
+    </defs>
+  </svg>
+  <figure class="pintaselite">
+    <div class="pintaselite__asteikko">
+      <svg class="pintaselite__kuva" viewBox="0 0 ${w} ${h}" aria-hidden="true">
+        <rect x="0" y="${y(0).toFixed(1)}" width="${w}"
+              height="${(y(yMax) - y(0)).toFixed(1)}" fill="url(#trendi-humus)"/>
+        ${viivat}
+        <line class="trendi__pinta" x1="0" y1="${y(0).toFixed(1)}" x2="${w}" y2="${y(0).toFixed(1)}"/>
+      </svg>
+      <span class="pintaselite__yla"><b>0 m</b> vedenpinta</span>
+      <span class="pintaselite__ala"><b>7 m</b> syvyys</span>
+    </div>
+    <figcaption>Syvyys kasvaa alaspäin, kuten vesipatsaassa. Mitä alempana käyrä
+      kulkee, sitä syvemmälle näkösyvyyslevy näkyy – eli sitä kirkkaampaa vesi on.
+      Kirkastuva vesi painaa käyrän alas. Ruskea sävy yläreunassa on humusta,
+      ja se haalistuu alaspäin: syvälle kantava valo tarkoittaa puhtaampaa vettä.
+      Sävy on vain asteikon vihje eikä liity kartan ja taulukon luokkaväreihin.</figcaption>
+  </figure>`;
 }
 
 /** Koko osio: yhteenveto ja pisteet alueittain. */
@@ -311,6 +371,7 @@ function trendit(data, pisteaineisto) {
 
   return (
     yhteenveto +
+    pintaselite() +
     ryhmat
       .map(
         (r) => `<section class="trendiryhma">

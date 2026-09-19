@@ -96,6 +96,10 @@
   --water-hi: #071c21;
   --water-tint: #132a2c;
   --moss: #9ab86a;
+  /* Humuksen sävy trendikuvaajien vesipatsaassa. Oma väri eikä --b-sarjan
+     sävy: sarja tarkoittaa mitattua kirkkausluokkaa kartalla ja taulukossa,
+     tämä liuku tarkoittaa syvyyttä. Niitä ei saa sekoittaa keskenään. */
+  --humus: #8a5a34;
   --nieria: #e8916a;
   --nieria-bright: #ef9c76;
 
@@ -1649,6 +1653,94 @@ p {
   stroke: var(--rule);
   stroke-width: 1;
   vector-effect: non-scaling-stroke;
+}
+
+/* Liuvun määritys on oma, näkymätön SVG. Viittaukset url(#trendi-humus)
+   toimivat saman dokumentin sisällä, joten yksi määritys riittää kaikille. */
+.trendi__liuku {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* Vaimea: liuku on asteikon vihje eikä kuvaajan sisältö. Voimakkaampana se
+   luki täytettynä pinta-alakuvaajana ja hukutti mittausviivan alleen. */
+.trendi__liuku-pinta {
+  stop-color: var(--humus);
+  stop-opacity: 0.22;
+}
+
+.trendi__liuku-pohja {
+  stop-color: var(--humus);
+  stop-opacity: 0;
+}
+
+/* Vedenpinta on kuvaajan yläreuna: apuviivoja vahvempi, jottei sitä lue
+   pelkkänä ruudukon viivana. */
+.trendi__pinta {
+  stroke: var(--ink-2);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+/* --- Pystyasteikon selite ------------------------------------------------ */
+.pintaselite {
+  display: grid;
+  /* minmax(0, 1fr) eikä min()-pohjaista vähimmäisleveyttä: prosenttiperustainen
+     minimi työnsi sivua 23 pikseliä sivusuunnassa 380 pikselin näytöllä. */
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 1rem 1.25rem;
+  align-items: start;
+  margin: 0 0 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+/* Kapealla näytöllä selite latoutuu asteikon alle, jottei teksti puristu
+   parin sanan levyiseksi palstaksi. */
+@media (max-width: 34rem) {
+  .pintaselite {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.pintaselite__asteikko {
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-rows: auto auto;
+  gap: 0 0.6rem;
+  align-items: start;
+}
+
+.pintaselite__kuva {
+  grid-row: 1 / span 2;
+  width: 1.6rem;
+  height: 6rem;
+}
+
+.pintaselite__yla,
+.pintaselite__ala {
+  font-size: var(--fs-micro);
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.pintaselite__ala {
+  align-self: end;
+}
+
+.pintaselite__yla b,
+.pintaselite__ala b {
+  font-family: var(--mono);
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.pintaselite figcaption {
+  font-size: var(--fs-micro);
+  color: var(--ink-2);
+  line-height: 1.5;
 }
 
 /* Maaliskuun jääkierros merkitään, koska sitä ei voi verrata kesäkierroksiin. */
