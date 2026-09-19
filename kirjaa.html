@@ -43,7 +43,11 @@
   </section>
 
   <section class="band band--tight">
-    <div class="wrap wrap--tyokalu">
+    <!-- Portti on sivuston tavallisessa kehyksessä ja kirjausnäkymä leveässä.
+         Sama leveä kehys molemmille vei pienen lomakkeen aivan sivun vasempaan
+         reunaan, sivun otsikon vasemmalle puolelle. Tavallinen kehys pitää
+         lomakkeen vasemman reunan samassa linjassa otsikon kanssa. -->
+    <div class="wrap">
 
       <div class="portti" data-portti>
         <form class="portti__lomake">
@@ -63,14 +67,16 @@
         </form>
       </div>
 
-      <div data-kirjaa hidden>
-        <p class="status" data-status>Ladataan mittauspisteitä…</p>
-      </div>
-
       <noscript><p class="status">Kirjaus vaatii JavaScriptin. Ilman sitä mittaukset
         kirjataan paperille ja toimitetaan sihteerille:
         <a href="mailto:leo.lauramaa@gmail.com">leo.lauramaa@gmail.com</a>.</p></noscript>
 
+    </div>
+
+    <div class="wrap wrap--tyokalu">
+      <div data-kirjaa hidden>
+        <p class="status" data-status>Ladataan mittauspisteitä…</p>
+      </div>
     </div>
   </section>
 
