@@ -28,15 +28,14 @@ const YHTEYS = {
   facebook: "https://www.facebook.com/Prokuolimo",
 };
 
-/** Yhdistyksen tunnus: järven ääriviiva ja kaksi syvyyskäyrää. */
-const MARK = `<svg class="brand__mark" viewBox="0 0 48 48" fill="none" aria-hidden="true">
-  <path d="M24 4c9 1 16 7 17 16 1 9-4 18-13 23-7 3-16 0-20-7C4 29 6 18 12 11c4-5 8-7 12-7Z"
-        stroke="currentColor" stroke-width="2.1" stroke-linejoin="round"/>
-  <path d="M24 11.5c7 1 11 5 12 11 1 6-3 13-9 16-5 2-12 0-14-5-2-5-1-12 3-16 3-4 5-6 8-6Z"
-        stroke="currentColor" stroke-width="1.5" stroke-opacity=".72" stroke-linejoin="round"/>
-  <path d="M24 19c4 .6 6 2.6 6 5.6 0 3.6-3 6.4-6 6.4-4 0-6-2.8-6-6.4 0-3 3-5.6 6-5.6Z"
-        fill="currentColor" fill-opacity=".9"/>
-</svg>`;
+/**
+ * Yhdistyksen logo. Purettu mittausohjeen PDF:stä tools/pura-logo.py:llä ja
+ * käännetty vaaleaksi tummalle pohjalle. Sama kuva sekä ylä- että
+ * alatunnisteessa, eri kokoisena. Linkillä on oma aria-label, joten kuva on
+ * ruudunlukijalle koristeellinen (alt="") eikä nimeä toisteta kahdesti.
+ */
+const LOGO = `<img class="brand__logo" src="assets/img/pro-kuolimo-logo.png"
+  width="754" height="212" alt="">`;
 
 /** Nykyinen tiedostonimi, esim. "kuolimo.html". Juuri vastaa index.html:ää. */
 function currentPage() {
@@ -59,11 +58,7 @@ class SiteHeader extends HTMLElement {
 <header class="topbar">
   <div class="wrap topbar__inner">
     <a class="brand" href="index.html" aria-label="Pro Kuolimo ry, etusivu">
-      ${MARK}
-      <span class="brand__text">
-        <span class="brand__name">Pro Kuolimo</span>
-        <span class="brand__sub">Vesiensuojelua vuodesta 2012</span>
-      </span>
+      ${LOGO}
     </a>
     <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="paavalikko">
       <span class="nav-toggle__bars" aria-hidden="true"><i></i><i></i><i></i></span>

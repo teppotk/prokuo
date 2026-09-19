@@ -259,8 +259,13 @@ ever comes back, the ramp has to keep one meaning in both.
   redrawing; the wave blue is the association's own and is left alone. Output is
   **PNG8, deliberately against the site's webp convention**: a two-colour image
   palettises to 12.8 kB where lossless webp is 64 kB and lossy webp smears the
-  flat edges. The topbar keeps its compact mark plus live text, because the full
-  logo with its tagline cannot be read at topbar height.
+  flat edges. The same file serves the topbar (2.75rem tall) and the footer
+  (19rem wide). At topbar height the tagline is about 10px — small but legible,
+  and it is logo artwork rather than text, so the site's 14px floor does not
+  apply; below roughly 2.4rem it degrades into a grey smear, which is why the
+  narrow-screen step stops there. The hand-drawn lake mark that stood in for the
+  logo is gone, along with `.brand__mark`, `.brand__text`, `.brand__name` and
+  `.brand__sub` — the logo carries its own mark and wordmark.
 - Components rendered on `.band--deep` (dark water sections) need explicit light
   overrides — several already exist in the CSS. Check any new component there.
 
