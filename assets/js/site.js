@@ -105,10 +105,9 @@ class SiteFooter extends HTMLElement {
   <div class="wrap">
     <div class="footer__grid">
       <div>
-        <div class="footer__mark">
-          ${MARK.replace("brand__mark", "")}
-          <span>Pro Kuolimo ry</span>
-        </div>
+        <img class="footer__logo" src="assets/img/pro-kuolimo-logo.png"
+             width="754" height="212"
+             alt="Pro Kuolimo ry – puhtaan veden puolesta">
         <p>Edistämme vesiensuojelua, luonnonsuojelua ja maisemanhoitoa
         Kuolimolla ja sen valuma-alueella Etelä-Karjalassa ja Etelä-Savossa.</p>
       </div>

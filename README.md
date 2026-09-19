@@ -101,6 +101,18 @@ kohdistettu koordinaatistoon pisteiden paikannimien avulla. Mittaajat
 tarkentavat sijainteja kirjaussivulla, joten älä yliaja korjattuja arvoja
 ajamalla työkalua uudelleen – tarkista aina diff.
 
+## Yhdistyksen logo
+
+Logoa ei ole erillisenä tiedostona missään: se on upotettuna mittausohjeen
+PDF:n ylätunnisteeseen. Alatunnisteen logo puretaan sieltä:
+
+```bash
+python3 tools/pura-logo.py      # -> assets/img/pro-kuolimo-logo.png
+```
+
+Työkalu purkaa valkoisen pohjan läpinäkyvyydeksi ja kääntää tekstin vaaleaksi
+tummalle sivustolle. Aaltojen sininen on yhdistyksen tunnusväri eikä muutu.
+
 ## Sisällön päivitys ilman koodia
 
 | Mitä | Missä |
