@@ -70,6 +70,20 @@ const AVAIN_MITTAAJA = "prokuolimo.mittaaja";
  */
 const PISTEEN_SIETO_M = 250;
 
+/**
+ * Zoom-taso, johon kartta vetäytyy kun piste valitaan tai sijainti asetetaan.
+ * Aloitusnäkymä sovitetaan koko pisteistöön, jolloin pisteet ovat kasassa eikä
+ * yksittäistä voi varmistaa – ilman tätä mittaaja zoomaisi käsin joka kerta.
+ *
+ * Taso 13 on noin 9 metriä pikselillä, eli puhelimen ruudulle mahtuu pari
+ * kilometriä: lahti ja vastaranta näkyvät, joten valitun pisteen voi tarkistaa
+ * ympäristöstä. Lähempänä konteksti katoaa. Taso riittää myös erottamaan
+ * lähimmät pisteet B1 ja B2, jotka ovat 587 metrin päässä toisistaan.
+ *
+ * Jos käyttäjä on jo zoomannut lähemmäs, sitä ei peruuteta.
+ */
+const PISTEEN_ZOOM = 13;
+
 /* --- Paikallinen tallennus ----------------------------------------------- */
 
 function lue(avain, oletus) {
@@ -387,6 +401,11 @@ async function kaynnista(juuri) {
       ${varoitus}`;
   }
 
+  /** Siirtää kartan kohtaan ja zoomaa vähintään PISTEEN_ZOOM-tasolle. */
+  function lahennaKohtaan(lat, lon) {
+    kartta.setView([lat, lon], Math.max(kartta.getZoom(), PISTEEN_ZOOM));
+  }
+
   function valitsePiste(id, siirraSijainti) {
     pisteValinta.value = id;
     irronnutPiste = "";
@@ -396,7 +415,7 @@ async function kaynnista(juuri) {
       tila.lon = p.lon;
       tila.lahde = "piste";
       paivitaSijainti();
-      kartta.panTo([p.lat, p.lon]);
+      lahennaKohtaan(p.lat, p.lon);
     }
   }
 
@@ -488,7 +507,6 @@ async function kaynnista(juuri) {
         if (ensimmainenPaikannus) {
           ensimmainenPaikannus = false;
           kaytaOmaaSijaintia();
-          kartta.setView([latitude, longitude], 14);
         }
       },
       paikannusVirhe,
@@ -506,7 +524,7 @@ async function kaynnista(juuri) {
     tila.tarkkuus = tila.gps.tarkkuus;
     tila.lahde = "gps";
     paivitaSijainti();
-    kartta.panTo([tila.lat, tila.lon]);
+    lahennaKohtaan(tila.lat, tila.lon);
   }
 
   juuri.querySelector("[data-oma-sijainti]").addEventListener("click", kaytaOmaaSijaintia);
@@ -719,7 +737,7 @@ async function kaynnista(juuri) {
     pisteValinta.value = pisteet.some((p) => p.id === k.piste) ? k.piste : "";
     irronnutPiste = "";
     paivitaSijainti();
-    kartta.setView([k.lat, k.lon], Math.max(kartta.getZoom(), 13));
+    lahennaKohtaan(k.lat, k.lon);
     valittuKirjaus = k.id;
     merkitseValittuRivi();
   }

@@ -140,6 +140,17 @@ volunteer uses in the boat. `assets/js/kartta-apu.js` holds what they share
 - Logged measurements live in `localStorage` only and are exported as JSON or
   CSV (semicolon-separated, decimal comma, BOM — Finnish Excel). Database
   storage is an open decision, not a finished one; keep the export path working.
+- Choosing a point zooms the map in to `PISTEEN_ZOOM` (13) instead of only
+  panning. The opening view is fitted to all thirty points, where they sit in one
+  clump and none can be identified, so without this the volunteer re-did the same
+  zoom by hand every time. 13 leaves roughly a couple of kilometres on screen —
+  the bay, the far shore and the neighbouring points — which is what lets someone
+  confirm they picked the right point. An existing closer zoom is never undone.
+- **Testing note:** Leaflet's animated zoom never finishes under Chrome headless
+  with `--virtual-time-budget`, so `map.getZoom()` keeps its old value and zoom
+  controls, wheel, double-click and `setView` all look broken. Assert zoom against
+  a copy of `kartta-apu.js` with `zoomAnimation: false`, and measure the level from
+  the pixel distance between two point markers rather than from tile URLs.
 - `kirjaa.html` must send a `Referer` to the tile server. Its
   `<meta name="referrer">` is `origin`, never `no-referrer`: OpenStreetMap's
   volunteer servers block traffic they cannot attribute to an app and answer
