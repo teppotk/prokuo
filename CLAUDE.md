@@ -208,16 +208,34 @@ Consequences to respect:
 
 ## Design system
 
-Tokens live in `:root` in `assets/css/site.css`; dark mode is a *separate set of
-chosen values* under `prefers-color-scheme: dark`, not an inversion.
+Tokens live in `:root` in `assets/css/site.css`. **The site is dark only.** It
+used to ship a light palette with a chosen dark set under
+`prefers-color-scheme: dark`, but a reader on a phone in light mode then saw a
+white site — and, worse, the näkösyvyys ramp ran the opposite way in the two
+modes (darker = clearer in light, lighter = clearer in dark), which read as
+nonsense to anyone comparing devices. There is now one palette and one ramp
+direction. `:root` carries `color-scheme: dark`, which is what makes native
+controls — selects, date and time pickers, checkboxes, scrollbars — render dark
+too; do not drop it. Each page carries a single `theme-color` meta.
+
+Re-introducing a light theme means re-introducing that contradiction, so if it
+ever comes back, the ramp has to keep one meaning in both.
 
 - Type roles: Fraunces (voice, headings), Archivo (information, body and UI),
   IBM Plex Mono (measurement — numbers, dates, identifiers, captions).
   Self-hosted in `assets/fonts/` as latin + latin-ext subsets.
 - `--b1` … `--b6` are a single-hue sequential water ramp for näkösyvyys classes,
-  darker = clearer water. Each has a paired `--bN-fg` text colour chosen so the
-  number on top clears 4.5:1 in both schemes. **Changing a background step
-  without rechecking its `-fg` pair breaks contrast.**
+  **lighter = clearer water** (the ramp reads as more light reaching deeper).
+  Each has a paired `--bN-fg` text colour chosen so the
+  number on top clears 4.5:1. **Changing a background step without rechecking its
+  `-fg` pair breaks contrast.** Known issue, measured not guessed: the two
+  darkest steps sit close to the page background — `--b1` reaches only 1.27:1
+  against `--paper` and `--b2` 1.84:1, below the 2:1 an ordinal ramp wants. The
+  value printed on the cell is unaffected (`--b1` against `--b-on-dark` is
+  12.3:1), so no data is lost, but the murkiest cells blend into the page.
+  Fixing it means re-spacing the whole ramp, which touches the register table,
+  the map markers, the legend and the trend charts at once — a deliberate design
+  pass, not a token tweak.
 - `--nieria` is the Arctic char's spawning colour and is reserved for membership
   CTAs and focus rings. Don't spend it on decoration.
 - Photo credits belong in `<figcaption>`; the char photo is credited to

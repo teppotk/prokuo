@@ -82,38 +82,41 @@
 
 /* --- Muuttujat ---------------------------------------------------------- */
 :root {
-  color-scheme: light dark;
+  color-scheme: dark;
 
-  --paper: #edf1ee;
-  --paper-2: #e3e9e5;
-  --paper-3: #d9e1dd;
-  --ink: #0f1a19;
-  --ink-2: #47554f;
-  --rule: #c8d2cd;
-  --rule-strong: #a9b6b0;
+  --paper: #0d1412;
+  --paper-2: #131c1a;
+  --paper-3: #1a2523;
+  --ink: #e8ece7;
+  --ink-2: #9aa8a2;
+  --rule: #26332e;
+  --rule-strong: #3a4a44;
 
-  --water: #12525c;
-  --water-hi: #0b2f37;
-  --water-tint: #dfe9e9;
-  --moss: #56712f;
-  --nieria: #a8471f;
-  --nieria-bright: #c8542a;
+  --water: #6fb4bb;
+  --water-hi: #071c21;
+  --water-tint: #132a2c;
+  --moss: #9ab86a;
+  --nieria: #e8916a;
+  --nieria-bright: #ef9c76;
 
-  /* Näkösyvyyden sävysarja, vaalea tila. Tumma = kirkkaampi vesi. */
-  --b1: #dfe9e9;
-  --b2: #bcd5d7;
-  --b3: #91bcc0;
-  --b4: #5c9ba3;
-  --b5: #2c7480;
-  --b6: #12525c;
-  --b-on-light: #0f1a19;
-  --b-on-dark: #f2f6f4;
-  --b1-fg: var(--b-on-light);
-  --b2-fg: var(--b-on-light);
-  --b3-fg: var(--b-on-light);
+  /* Näkösyvyyden sävysarja: vaaleampi = kirkkaampi vesi. Sivusto on vain
+     tumma, joten sarjalla on yksi suunta – aiemmin vaaleassa tilassa suunta
+     oli päinvastainen, mikä hämäsi lukijaa. --b-on-light ja --b-on-dark ovat
+     tekstivärit vaaleille ja tummille sävyaskelmille. */
+  --b1: #1b2b2c;
+  --b2: #23474b;
+  --b3: #2f6a71;
+  --b4: #479098;
+  --b5: #6fb4bb;
+  --b6: #a3d5d9;
+  --b-on-light: #08181a;
+  --b-on-dark: #e8ece7;
+  --b1-fg: var(--b-on-dark);
+  --b2-fg: var(--b-on-dark);
+  --b3-fg: var(--b-on-dark);
   --b4-fg: var(--b-on-light);
-  --b5-fg: var(--b-on-dark);
-  --b6-fg: var(--b-on-dark);
+  --b5-fg: var(--b-on-light);
+  --b6-fg: var(--b-on-light);
 
   --serif: Fraunces, "Iowan Old Style", Palatino, Georgia, serif;
   --sans: Archivo, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -138,43 +141,7 @@
   --gutter: clamp(1.25rem, 5vw, 3rem);
   --band-space: clamp(3.5rem, 8vw, 6.5rem);
   --radius: 3px;
-  --shadow: 0 1px 2px rgb(11 47 55 / 6%), 0 8px 24px -12px rgb(11 47 55 / 18%);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #0d1412;
-    --paper-2: #131c1a;
-    --paper-3: #1a2523;
-    --ink: #e8ece7;
-    --ink-2: #9aa8a2;
-    --rule: #26332e;
-    --rule-strong: #3a4a44;
-
-    --water: #6fb4bb;
-    --water-hi: #071c21;
-    --water-tint: #132a2c;
-    --moss: #9ab86a;
-    --nieria: #e8916a;
-    --nieria-bright: #ef9c76;
-
-    --b1: #1b2b2c;
-    --b2: #23474b;
-    --b3: #2f6a71;
-    --b4: #479098;
-    --b5: #6fb4bb;
-    --b6: #a3d5d9;
-    --b-on-light: #08181a;
-    --b-on-dark: #e8ece7;
-    --b1-fg: var(--b-on-dark);
-    --b2-fg: var(--b-on-dark);
-    --b3-fg: var(--b-on-dark);
-    --b4-fg: var(--b-on-light);
-    --b5-fg: var(--b-on-light);
-    --b6-fg: var(--b-on-light);
-
-    --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px -12px rgb(0 0 0 / 60%);
-  }
+  --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 8px 24px -12px rgb(0 0 0 / 60%);
 }
 
 /* --- Perusta ------------------------------------------------------------ */
@@ -1773,10 +1740,8 @@ p {
 
 /* Laattoja ei käännetä negatiiviksi – kartan pitää näyttää kartalta. Tummassa
    tilassa kirkkautta lasketaan sen verran, ettei valkoinen laatta häikäise. */
-@media (prefers-color-scheme: dark) {
-  .leaflet-tile-pane {
-    filter: brightness(0.82) contrast(1.06) saturate(0.9);
-  }
+.leaflet-tile-pane {
+  filter: brightness(0.82) contrast(1.06) saturate(0.9);
 }
 
 .leaflet-container {
